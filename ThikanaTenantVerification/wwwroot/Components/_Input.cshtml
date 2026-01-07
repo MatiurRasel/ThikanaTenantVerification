@@ -1,0 +1,35 @@
+﻿@{
+    var id = ViewData["Id"] as string ?? "";
+    var type = ViewData["Type"] as string ?? "text";
+    var label = ViewData["Label"] as string ?? "";
+    var placeholder = ViewData["Placeholder"] as string ?? "";
+    var icon = ViewData["Icon"] as string ?? "";
+    var isRequired = (ViewData["Required"] as bool?) ?? false;
+    var value = ViewData["Value"] as string ?? "";
+    var className = ViewData["Class"] as string ?? "";
+}
+
+<div class="form-group @className">
+    @if (!string.IsNullOrEmpty(label))
+    {
+        <label for="@id" class="form-label">
+            @label @if (isRequired)
+            {
+                <span class="required">*</span>
+            }
+        </label>
+    }
+    <div class="input-wrapper @(!string.IsNullOrEmpty(icon) ? "with-icon" : "")">
+        @if (!string.IsNullOrEmpty(icon))
+        {
+            <i class="@icon input-icon"></i>
+        }
+        <input type="@type"
+               id="@id"
+               class="form-control"
+               placeholder="@placeholder"
+               value="@value"
+        @(isRequired ? "required" : "") />
+    </div>
+    @RenderBody()
+</div>

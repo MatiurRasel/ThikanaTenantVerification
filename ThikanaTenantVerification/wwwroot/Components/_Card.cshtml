@@ -1,0 +1,27 @@
+﻿@{
+    var title = ViewData["Title"] as string ?? "";
+    var subtitle = ViewData["Subtitle"] as string ?? "";
+    var icon = ViewData["Icon"] as string ?? "";
+    var variant = ViewData["Variant"] as string ?? "default";
+    var className = ViewData["Class"] as string ?? "";
+}
+
+<div class="card card-@variant @className">
+    @if (!string.IsNullOrEmpty(icon) || !string.IsNullOrEmpty(title))
+    {
+        <div class="card-header">
+            @if (!string.IsNullOrEmpty(icon))
+            {
+                <i class="@icon"></i>
+            }
+            <h3>@title</h3>
+            @if (!string.IsNullOrEmpty(subtitle))
+            {
+                <p>@subtitle</p>
+            }
+        </div>
+    }
+    <div class="card-body">
+        @RenderBody()
+    </div>
+</div>

@@ -1,0 +1,357 @@
+﻿@{
+    ViewData["Title"] = "ব্যবহারকারী লগইন";
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <style>
+        .login-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .login-tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+            .login-tab.active {
+                color: #1a237e;
+            }
+
+                .login-tab.active::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -2px;
+                    left: 0;
+                    right: 0;
+                    height: 2px;
+                    background: var(--primary-gradient);
+                }
+
+        .tab-content {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .social-login {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .social-login-title {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+            .social-login-title::before,
+            .social-login-title::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                width: 30%;
+                height: 1px;
+                background: #e2e8f0;
+            }
+
+            .social-login-title::before {
+                left: 0;
+            }
+
+            .social-login-title::after {
+                right: 0;
+            }
+
+        .social-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .social-btn {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: white;
+            color: #475569;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .social-btn:hover {
+                background: #f8fafc;
+                transform: translateY(-2px);
+            }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .forgot-password {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .forgot-password:hover {
+                text-decoration: underline;
+            }
+
+        .register-link {
+            text-align: center;
+            margin-top: 2rem;
+            color: #64748b;
+        }
+
+            .register-link a {
+                color: #6366f1;
+                font-weight: 600;
+                text-decoration: none;
+            }
+
+                .register-link a:hover {
+                    text-decoration: underline;
+                }
+    </style>
+}
+
+<div class="login-page">
+    <div class="login-background"></div>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">
+                    <div class="login-logo-icon animated">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h1 class="login-title">ঠিকানা</h1>
+                </div>
+                <p class="login-subtitle">ভাড়াটিয়া যাচাইকরণ সিস্টেম</p>
+            </div>
+
+            <!-- Login Tabs -->
+            <div class="login-tabs">
+                <button class="login-tab active" onclick="switchTab('login')">
+                    <i class="fas fa-sign-in-alt"></i>
+                    লগইন
+                </button>
+                <button class="login-tab" onclick="switchTab('register')">
+                    <i class="fas fa-user-plus"></i>
+                    রেজিস্ট্রেশন
+                </button>
+            </div>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger alert-animated">
+                    <i class="fas fa-exclamation-circle"></i>
+                    @ViewBag.Error
+                </div>
+            }
+
+            <!-- Login Form (Existing Users) -->
+            <div id="loginTab" class="tab-content">
+                <form method="post" action="@Url.Action("UserLogin", "Home")">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-id-card"></i>
+                            NID নম্বর বা মোবাইল নম্বর
+                        </label>
+                        <div class="input-wrapper with-icon">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text"
+                                   name="username"
+                                   class="form-control"
+                                   placeholder="NID নম্বর বা মোবাইল নম্বর"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-lock"></i>
+                            পাসওয়ার্ড
+                        </label>
+                        <div class="input-wrapper with-icon">
+                            <i class="fas fa-key input-icon"></i>
+                            <input type="password"
+                                   name="password"
+                                   class="form-control"
+                                   placeholder="পাসওয়ার্ড"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="remember-forgot">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">মনে রাখুন</label>
+                        </div>
+                        <a href="#" class="forgot-password">পাসওয়ার্ড ভুলে গেছেন?</a>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-ghost">
+                            <i class="fas fa-home"></i>
+                            হোম
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt"></i>
+                            লগইন
+                        </button>
+                    </div>
+                </form>
+
+                <div class="register-link">
+                    একাউন্ট নেই? <a href="#" onclick="switchTab('register')">রেজিস্ট্রেশন করুন</a>
+                </div>
+            </div>
+
+            <!-- Registration Form (New Users) -->
+            <div id="registerTab" class="tab-content" style="display: none;">
+                <form method="post" action="@Url.Action("Login", "Home")">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-id-card"></i>
+                            জাতীয় পরিচয়পত্র নম্বর *
+                        </label>
+                        <div class="input-wrapper with-icon">
+                            <i class="fas fa-id-card input-icon"></i>
+                            <input type="text"
+                                   name="idNumber"
+                                   class="form-control"
+                                   placeholder="১০, ১৩, ১৪ বা ১৭ ডিজিটের NID নম্বর"
+                                   pattern="[0-9]{10}|[0-9]{13}|[0-9]{14}|[0-9]{17}"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-mobile-alt"></i>
+                            মোবাইল নম্বর *
+                        </label>
+                        <div class="input-wrapper with-icon">
+                            <i class="fas fa-phone input-icon"></i>
+                            <input type="tel"
+                                   name="mobileNumber"
+                                   class="form-control"
+                                   placeholder="০১XXXXXXXXX"
+                                   pattern="01[3-9]\d{8}"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="demo-credentials">
+                        <h5><i class="fas fa-user-secret"></i> ডেমো ক্রেডেনশিয়ালস</h5>
+                        <div class="demo-grid">
+                            <div class="demo-item" onclick="fillDemo(1)">
+                                <div class="demo-label">ডেমো NID ১</div>
+                                <div class="demo-value">1990123456789</div>
+                            </div>
+                            <div class="demo-item" onclick="fillDemo(2)">
+                                <div class="demo-label">ডেমো NID ২</div>
+                                <div class="demo-value">1991123456789</div>
+                            </div>
+                        </div>
+                        <small class="demo-info">যেকোনো ১১ ডিজিটের মোবাইল নম্বর দিয়ে পরীক্ষা করুন</small>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-ghost">
+                            <i class="fas fa-home"></i>
+                            হোম
+                        </a>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-arrow-right"></i>
+                            পরবর্তী ধাপ
+                        </button>
+                    </div>
+                </form>
+
+                <div class="register-link">
+                    ইতিমধ্যে একাউন্ট আছে? <a href="#" onclick="switchTab('login')">লগইন করুন</a>
+                </div>
+            </div>
+
+            <!-- Development Tips -->
+            <div class="dev-tips">
+                <div class="tip-header">
+                    <i class="fas fa-lightbulb"></i>
+                    <h5>ডেভেলপমেন্ট টিপস</h5>
+                </div>
+                <div class="tip-content">
+                    <div class="tip-item">
+                        <div class="tip-icon">1</div>
+                        <div class="tip-text">নতুন ইউজার: NID + মোবাইল → OTP → পাসওয়ার্ড সেট</div>
+                    </div>
+                    <div class="tip-item">
+                        <div class="tip-icon">2</div>
+                        <div class="tip-text">রিটার্নিং ইউজার: NID/মোবাইল + পাসওয়ার্ড</div>
+                    </div>
+                    <div class="tip-item">
+                        <div class="tip-icon">3</div>
+                        <div class="tip-text">ডেমো OTP: <strong>123456</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Switch between login and registration tabs
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.login-tab');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.style.display = 'none');
+
+            if (tabName === 'login') {
+                document.querySelector('.login-tab[onclick*="login"]').classList.add('active');
+                document.getElementById('loginTab').style.display = 'block';
+            } else {
+                document.querySelector('.login-tab[onclick*="register"]').classList.add('active');
+                document.getElementById('registerTab').style.display = 'block';
+            }
+        }
+
+        // Fill demo credentials
+        function fillDemo(type) {
+            if (type === 1) {
+                document.querySelector('input[name="idNumber"]').value = '1990123456789';
+            } else {
+                document.querySelector('input[name="idNumber"]').value = '1991123456789';
+            }
+            document.querySelector('input[name="mobileNumber"]').value = '01712345678';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Focus on first input
+            const firstInput = document.querySelector('.tab-content:not([style*="none"]) input');
+            if (firstInput) {
+                firstInput.focus();
+            }
+        });
+    </script>
+}

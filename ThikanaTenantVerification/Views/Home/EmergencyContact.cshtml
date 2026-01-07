@@ -1,0 +1,182 @@
+﻿@model ThikanaTenantVerification.Models.User
+
+@{
+    ViewData["Title"] = "জরুরী যোগাযোগ";
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h4><i class="fas fa-phone-alt"></i> জরুরী যোগাযোগ ব্যক্তির তথ্য</h4>
+        </div>
+        <div class="card-body">
+            <form id="emergencyContactForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">নাম (বাংলায়) *</label>
+                            <input type="text" class="form-control" name="NameBN" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">সম্পর্ক *</label>
+                            <select class="form-select" name="Relationship" required>
+                                <option value="">সম্পর্ক নির্বাচন করুন</option>
+                                <option value="পিতা">পিতা</option>
+                                <option value="মাতা">মাতা</option>
+                                <option value="ভাই">ভাই</option>
+                                <option value="বোন">বোন</option>
+                                <option value="স্ত্রী">স্ত্রী</option>
+                                <option value="স্বামী">স্বামী</option>
+                                <option value="সন্তান">সন্তান</option>
+                                <option value="অন্যান্য">অন্যান্য</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">মোবাইল নম্বর *</label>
+                            <input type="tel" class="form-control" name="MobileNumber"
+                                   pattern="01[3-9]\d{8}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">এনআইডি নম্বর (ঐচ্ছিক)</label>
+                            <input type="text" class="form-control" name="NIDNumber">
+                            <button type="button" class="btn btn-sm btn-outline-info mt-1" onclick="verifyNID()">
+                                <i class="fas fa-search"></i> যাচাই করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">ঠিকানা *</label>
+                    <textarea class="form-control" name="Address" rows="3" required></textarea>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> সংরক্ষণ করুন
+                    </button>
+                    <a href="@Url.Action("Dashboard", new { id = Model.Id })" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> ড্যাশবোর্ড
+                    </a>
+                </div>
+            </form>
+
+            <hr>
+
+            <!-- Existing Contacts -->
+            <h5 class="mt-4">যোগকৃত যোগাযোগ সমূহ</h5>
+            <div id="contactsList" class="mt-3">
+                <!-- Contacts will be loaded here dynamically -->
+                @if (Model.EmergencyContacts != null && Model.EmergencyContacts.Any())
+                {
+                    foreach (var contact in Model.EmergencyContacts)
+                    {
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6>@contact.NameBN</h6>
+                                        <p class="mb-1">
+                                            <i class="fas fa-user-friends"></i> @contact.Relationship<br>
+                                            <i class="fas fa-phone"></i> @contact.MobileNumber
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteContact(@contact.Id)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle"></i> কোন জরুরী যোগাযোগ যোগ করা হয়নি।
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('emergencyContactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            // Show loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> সংরক্ষণ হচ্ছে...';
+            submitBtn.disabled = true;
+
+            // Simulate API call
+            setTimeout(() => {
+                // Add to contacts list
+                const contactsList = document.getElementById('contactsList');
+                const newContact = document.createElement('div');
+                newContact.className = 'card mb-2';
+                newContact.innerHTML = `
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6>${data.NameBN}</h6>
+                                <p class="mb-1">
+                                    <i class="fas fa-user-friends"></i> ${data.Relationship}<br>
+                                    <i class="fas fa-phone"></i> ${data.MobileNumber}
+                                </p>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-outline-danger" onclick="this.closest('.card').remove()">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Remove warning if exists
+                const warning = contactsList.querySelector('.alert-warning');
+                if (warning) {
+                    warning.remove();
+                }
+
+                contactsList.prepend(newContact);
+
+                // Reset form
+                this.reset();
+
+                // Show success message
+                alert('যোগাযোগ সফলভাবে সংরক্ষণ হয়েছে!');
+
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 1000);
+        });
+
+        function verifyNID() {
+            const nidInput = document.querySelector('input[name="NIDNumber"]');
+            if (nidInput.value.trim()) {
+                alert('এনআইডি যাচাই করা হচ্ছে... (ডেমো)');
+            } else {
+                alert('অনুগ্রহ করে এনআইডি নম্বর দিন');
+            }
+        }
+    </script>
+}

@@ -1,0 +1,145 @@
+﻿@model ThikanaTenantVerification.Models.CurrentLandlord
+
+@{
+    ViewData["Title"] = "বর্তমান বাড়িওয়ালা";
+    var userId = ViewBag.UserId;
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4><i class="fas fa-user-tie"></i> বর্তমান বাড়িওয়ালার তথ্য</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="SaveCurrentLandlord" method="post">
+                <input type="hidden" name="userId" value="@userId" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">মালিকের নাম *</label>
+                            <input asp-for="NameBN" class="form-control" required />
+                            <span asp-validation-for="NameBN" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">মোবাইল নম্বর *</label>
+                            <input asp-for="MobileNumber" class="form-control" required
+                                   pattern="01[3-9]\d{8}"
+                                   title="সঠিক মোবাইল নম্বর দিন (০১XXXXXXXXX)" />
+                            <span asp-validation-for="MobileNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">এনআইডি নম্বর (ঐচ্ছিক)</label>
+                            <input asp-for="NIDNumber" class="form-control"
+                                   pattern="\d{10,17}"
+                                   title="১০-১৭ ডিজিটের এনআইডি নম্বর" />
+                            <button type="button" class="btn btn-sm btn-info mt-1" onclick="verifyLandlordNID()">
+                                <i class="fas fa-search"></i> যাচাই করুন
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">থাকার শুরুর তারিখ *</label>
+                            <input asp-for="FromDate" type="date" class="form-control" required />
+                            <span asp-validation-for="FromDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ঠিকানা *</label>
+                    <textarea asp-for="Address" class="form-control" rows="3" required></textarea>
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">থাকার শেষ তারিখ (ঐচ্ছিক)</label>
+                            <input asp-for="ToDate" type="date" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="form-check mt-4">
+                                <input asp-for="IsVerified" class="form-check-input" />
+                                <label class="form-check-label">
+                                    তথ্য যাচাইকৃত
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle"></i>
+                    বাড়িওয়ালার তথ্য যাচাই করা হলে, তাকে স্বয়ংক্রিয়ভাবে নোটিফিকেশন পাঠানো হবে।
+                </div>
+
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> সংরক্ষণ করুন
+                    </button>
+                    <a href="@Url.Action("Dashboard", new { id = userId })"
+                       class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> ড্যাশবোর্ডে ফিরে যান
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function verifyLandlordNID() {
+            const nid = document.getElementById('NIDNumber').value;
+            if (nid.length >= 10 && nid.length <= 17) {
+                // Show loading
+                const verifyBtn = document.querySelector('button[onclick="verifyLandlordNID()"]');
+                const originalText = verifyBtn.innerHTML;
+                verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> যাচাই করা হচ্ছে...';
+                verifyBtn.disabled = true;
+
+                // Simulate API call
+                setTimeout(() => {
+                    // Mock verification result
+                    const isVerified = Math.random() > 0.3; // 70% chance of verification
+
+                    if (isVerified) {
+                        alert('✅ এনআইডি যাচাইকরণ সফল! বাড়িওয়ালার তথ্য পাওয়া গেছে।');
+                        document.getElementById('IsVerified').checked = true;
+                    } else {
+                        alert('⚠️ এনআইডি যাচাইকরণ ব্যর্থ। তথ্য পাওয়া যায়নি।');
+                    }
+
+                    // Reset button
+                    verifyBtn.innerHTML = originalText;
+                    verifyBtn.disabled = false;
+                }, 1500);
+            } else {
+                alert('অনুগ্রহ করে সঠিক এনআইডি নম্বর দিন (১০-১৭ ডিজিট)');
+            }
+        }
+
+        // Set minimum date for FromDate to today
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('FromDate').min = today;
+
+            // Set max date for ToDate based on FromDate
+            document.getElementById('FromDate').addEventListener('change', function() {
+                const toDateInput = document.getElementById('ToDate');
+                toDateInput.min = this.value;
+            });
+        });
+    </script>
+}

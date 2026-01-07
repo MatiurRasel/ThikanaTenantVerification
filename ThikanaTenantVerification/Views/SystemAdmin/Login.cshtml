@@ -1,0 +1,79 @@
+﻿@model SystemAdminLoginVM
+
+@{
+    ViewData["Title"] = "সিস্টেম অ্যাডমিন লগইন";
+}
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h1><i class="fas fa-lock"></i> সিস্টেম অ্যাডমিন লগইন</h1>
+            <p>অ্যাডমিন প্যানেলে প্রবেশ করুন</p>
+        </div>
+
+        <form asp-action="Login" method="post">
+            <div class="form-group">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" class="form-control" placeholder="ইমেইল ঠিকানা" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password"></label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="পাসওয়ার্ড" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <div class="form-check">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label"></label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+                <i class="fas fa-sign-in-alt"></i> লগইন করুন
+            </button>
+
+            <div class="text-center mt-3">
+                <a href="@Url.Action("Index", "Home")" class="text-muted">
+                    <i class="fas fa-arrow-left"></i> প্রধান পৃষ্ঠায় ফিরে যান
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+    }
+
+    .login-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        padding: 3rem;
+        width: 100%;
+        max-width: 450px;
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+        .login-header h1 {
+            color: #1a237e;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #666;
+        }
+</style>

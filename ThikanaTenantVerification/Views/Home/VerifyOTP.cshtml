@@ -1,0 +1,1207 @@
+﻿@{
+    ViewData["Title"] = "OTP যাচাই করুন";
+    var mobileNumber = ViewBag.MobileNumber;
+    var isNewUser = ViewBag.IsNewUser ?? false;
+    var userId = ViewBag.UserId;
+}
+
+<div class="login-page">
+    <div class="login-background">
+        <!-- Animated Background SVG -->
+        <svg class="wave-bg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+            <path fill="#1a237e" fill-opacity="0.1" d="M0,224L48,218.7C96,213,192,203,288,181.3C384,160,480,128,576,133.3C672,139,768,181,864,202.7C960,224,1056,224,1152,208C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            <path fill="#3949ab" fill-opacity="0.2" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,128C672,128,768,160,864,165.3C960,171,1056,149,1152,138.7C1248,128,1344,128,1392,128L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        </svg>
+    </div>
+    
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Animated Logo -->
+            <div class="login-header">
+                <div class="login-logo">
+                    <div class="login-logo-icon animated">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h1 class="login-title">ঠিকানা</h1>
+                </div>
+                <p class="login-subtitle">
+                    @if (isNewUser)
+                    {
+                        <span>নতুন ব্যবহারকারী নিবন্ধন</span>
+                    }
+                    else
+                    {
+                        <span>লগইন OTP যাচাই</span>
+                    }
+                </p>
+                
+                <!-- Progress Steps -->
+                <div class="progress-steps">
+                    <div class="step @(isNewUser ? "active" : "completed")">
+                        <span class="step-number">1</span>
+                        <span class="step-label">@(isNewUser ? "NID যাচাই" : "লগইন")</span>
+                    </div>
+                    <div class="step active">
+                        <span class="step-number">2</span>
+                        <span class="step-label">OTP যাচাই</span>
+                    </div>
+                    <div class="step @(isNewUser ? "" : "disabled")">
+                        <span class="step-number">3</span>
+                        <span class="step-label">@(isNewUser ? "পাসওয়ার্ড সেট" : "ড্যাশবোর্ড")</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Demo OTP Box with Animation -->
+            <div class="demo-otp-box pulse-animation">
+                <div class="demo-header">
+                    <i class="fas fa-code"></i>
+                    <span>ডেমো OTP কোড</span>
+                    <span class="demo-badge">ডেভেলপমেন্ট</span>
+                </div>
+                <div class="demo-code">
+                    <code class="typewriter">123456</code>
+                </div>
+                <p class="demo-info">
+                    <i class="fas fa-info-circle"></i>
+                    ডেভেলপমেন্টের জন্য এই কোডটি ব্যবহার করুন
+                </p>
+            </div>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger alert-animated">
+                    <i class="fas fa-exclamation-circle"></i>
+                    @ViewBag.Error
+                </div>
+            }
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-animated">
+                    <i class="fas fa-check-circle"></i>
+                    @TempData["Success"]
+                </div>
+            }
+
+            <!-- OTP Verification Form -->
+            <form method="post" action="@Url.Action("VerifyOTP", "Home")" id="otpForm" class="slide-up">
+                <input type="hidden" name="isNewUser" value="@isNewUser" />
+                @if (userId != null)
+                {
+                    <input type="hidden" name="userId" value="@userId" />
+                }
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-mobile-alt"></i>
+                        মোবাইল নম্বর
+                    </label>
+                    <div class="input-wrapper with-icon">
+                        <i class="fas fa-phone input-icon"></i>
+                        <input type="tel"
+                               class="form-control"
+                               value="@mobileNumber"
+                               readonly
+                               disabled>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-key"></i>
+                        ৬ ডিজিটের OTP কোড
+                    </label>
+                    <div class="input-wrapper with-icon">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="text"
+                               name="otp"
+                               class="form-control otp-input"
+                               placeholder="OTP কোড দিন"
+                               maxlength="6"
+                               pattern="\d{6}"
+                               required
+                               autocomplete="off"
+                               inputmode="numeric">
+                    </div>
+                    <div class="otp-hint">
+                        <small>ডেভেলপমেন্ট OTP: <strong>123456</strong></small>
+                    </div>
+                </div>
+
+                <!-- Password Setup Section (Only for New Users) -->
+                @if (isNewUser)
+                {
+                    <div id="passwordSection" class="password-section slide-up" style="display: none;">
+                        <div class="section-header">
+                            <h4><i class="fas fa-user-lock"></i> পাসওয়ার্ড সেট করুন</h4>
+                            <p class="text-muted">নিরাপদ পাসওয়ার্ড দিন যাতে কমপক্ষে ৮ অক্ষর, ১ বড় হাতের অক্ষর, ১ সংখ্যা এবং ১ বিশেষ অক্ষর থাকে</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-lock"></i>
+                                পাসওয়ার্ড *
+                            </label>
+                            <div class="input-wrapper with-icon">
+                                <i class="fas fa-key input-icon"></i>
+                                <input type="password"
+                                       name="password"
+                                       id="password"
+                                       class="form-control"
+                                       placeholder="পাসওয়ার্ড দিন"
+                                       minlength="8"
+                                       required
+                                       onkeyup="checkPasswordStrength(this.value)">
+                            </div>
+                            <div class="password-strength">
+                                <div class="strength-meter">
+                                    <div class="strength-fill" id="strengthFill"></div>
+                                </div>
+                                <div class="strength-text" id="strengthText">পাসওয়ার্ড শক্তি</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-lock"></i>
+                                পাসওয়ার্ড নিশ্চিত করুন *
+                            </label>
+                            <div class="input-wrapper with-icon">
+                                <i class="fas fa-key input-icon"></i>
+                                <input type="password"
+                                       name="confirmPassword"
+                                       id="confirmPassword"
+                                       class="form-control"
+                                       placeholder="পুনরায় পাসওয়ার্ড দিন"
+                                       minlength="8"
+                                       required
+                                       onkeyup="checkPasswordMatch()">
+                            </div>
+                            <div class="password-match" id="passwordMatch">
+                                <i class="fas fa-times-circle"></i>
+                                <span>পাসওয়ার্ড মিলছে না</span>
+                            </div>
+                        </div>
+
+                        <div class="password-requirements">
+                            <h6><i class="fas fa-list-check"></i> পাসওয়ার্ডের প্রয়োজনীয়তা:</h6>
+                            <ul class="requirements-list">
+                                <li id="req-length"><i class="fas fa-circle"></i> কমপক্ষে ৮ অক্ষর</li>
+                                <li id="req-uppercase"><i class="fas fa-circle"></i> অন্তত ১ টি বড় হাতের অক্ষর</li>
+                                <li id="req-lowercase"><i class="fas fa-circle"></i> অন্তত ১ টি ছোট হাতের অক্ষর</li>
+                                <li id="req-number"><i class="fas fa-circle"></i> অন্তত ১ টি সংখ্যা</li>
+                                <li id="req-special"><i class="fas fa-circle"></i> অন্তত ১ টি বিশেষ অক্ষর (!@@#$%^&*)</li>
+                            </ul>
+                        </div>
+                    </div>
+                }
+
+                <div class="form-actions">
+                    <a href="@Url.Action("Login", "Home")" class="btn btn-ghost">
+                        <i class="fas fa-arrow-left"></i>
+                        ফিরে যান
+                    </a>
+                    
+                    <div class="action-buttons">
+                        @if (isNewUser)
+                        {
+                            <button type="button" id="nextBtn" class="btn btn-primary btn-lg">
+                                <i class="fas fa-arrow-right"></i>
+                                পরবর্তী
+                            </button>
+                            <button type="submit" id="submitBtn" class="btn btn-success btn-lg" style="display: none;">
+                                <i class="fas fa-user-plus"></i>
+                                রেজিস্ট্রেশন সম্পূর্ণ করুন
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check-circle"></i>
+                                যাচাই করুন
+                            </button>
+                        }
+                    </div>
+                </div>
+            </form>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button type="button" class="quick-action-btn" onclick="useDemoOTP()">
+                    <i class="fas fa-magic"></i>
+                    ডেমো OTP বসান
+                </button>
+                <button type="button" class="quick-action-btn" onclick="autoSubmit()">
+                    <i class="fas fa-bolt"></i>
+                    অটো যাচাই
+                </button>
+                @if (isNewUser)
+                {
+                    <button type="button" class="quick-action-btn" onclick="generatePassword()">
+                        <i class="fas fa-dice"></i>
+                        পাসওয়ার্ড জেনারেট করুন
+                    </button>
+                }
+            </div>
+
+            <!-- Development Tips -->
+            <div class="dev-tips">
+                <div class="tip-header">
+                    <i class="fas fa-lightbulb"></i>
+                    <h5>ডেভেলপমেন্ট টিপস</h5>
+                </div>
+                <div class="tip-content">
+                    <div class="tip-item">
+                        <div class="tip-icon">1</div>
+                        <div class="tip-text">ডিফল্ট OTP <code>123456</code> ব্যবহার করুন</div>
+                    </div>
+                    <div class="tip-item">
+                        <div class="tip-icon">2</div>
+                        <div class="tip-text">যেকোনো ৬ ডিজিটের নম্বর কাজ করবে</div>
+                    </div>
+                    <div class="tip-item">
+                        <div class="tip-icon">3</div>
+                        <div class="tip-text">নতুন ইউজারের জন্য পাসওয়ার্ড সেট করতে হবে</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        /* Base Styles */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #1a237e 0%, #283593 25%, #303f9f 50%, #3949ab 75%, #5c6bc0 100%);
+            --secondary-gradient: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+            --success-gradient: linear-gradient(135deg, #00c853 0%, #64dd17 100%);
+            --warning-gradient: linear-gradient(135deg, #ffab00 0%, #ffd600 100%);
+        }
+
+        .login-page {
+            min-height: 100vh;
+            background: var(--primary-gradient);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        .wave-bg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+            animation: wave 20s linear infinite;
+        }
+
+        @@keyframes wave {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Login Container */
+        .login-container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 480px;
+            padding: 2.5rem;
+            animation: fadeInUp 0.8s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header */
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .login-logo-icon.animated {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-gradient);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(26, 35, 126, 0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(26, 35, 126, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(26, 35, 126, 0); }
+        }
+
+        .login-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .login-subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Progress Steps */
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            opacity: 1;
+        }
+
+        .step.completed .step-number {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .step.disabled {
+            opacity: 0.3;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background: #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-number {
+            background: var(--primary-gradient);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        /* Demo OTP Box */
+        .demo-otp-box {
+            background: var(--secondary-gradient);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-otp-box.pulse-animation {
+            animation: gentlePulse 3s infinite;
+        }
+
+        @@keyframes gentlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .demo-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .demo-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-left: auto;
+        }
+
+        .demo-code {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .demo-code code {
+            font-family: 'Courier New', monospace;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: 0.5rem;
+            animation: typewriter 0.5s steps(6) forwards;
+        }
+
+        @@keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .demo-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: #475569;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper.with-icon .form-control {
+            padding-left: 3rem;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6366f1;
+            z-index: 1;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .otp-input {
+            font-size: 2rem;
+            letter-spacing: 1rem;
+            text-align: center;
+            font-weight: 700;
+            padding: 1rem;
+        }
+
+        .otp-hint {
+            margin-top: 0.5rem;
+            text-align: center;
+            color: #94a3b8;
+        }
+
+        /* Password Section */
+        .password-section {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .section-header h4 {
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Password Strength */
+        .password-strength {
+            margin-top: 0.75rem;
+        }
+
+        .strength-meter {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            background: #ef4444;
+            border-radius: 3px;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+
+        .strength-text {
+            font-size: 0.8rem;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .password-match {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: #ef4444;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .password-match.show {
+            opacity: 1;
+        }
+
+        /* Password Requirements */
+        .password-requirements {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .password-requirements h6 {
+            color: #475569;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .requirements-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .requirements-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .requirements-list li.valid {
+            color: #10b981;
+        }
+
+        .requirements-list li.valid i {
+            color: #10b981;
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.75rem;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: #64748b;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-ghost:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(26, 35, 126, 0.3);
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-lg {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-action-btn {
+            flex: 1;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-width: 120px;
+        }
+
+        .quick-action-btn:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+
+        /* Development Tips */
+        .dev-tips {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .tip-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .tip-header i {
+            color: #f59e0b;
+            font-size: 1.25rem;
+        }
+
+        .tip-header h5 {
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .tip-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .tip-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .tip-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .tip-text {
+            font-size: 0.9rem;
+            color: #475569;
+        }
+
+        /* Animations */
+        .slide-up {
+            animation: slideUp 0.6s ease;
+        }
+
+        @@keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-animated {
+            animation: slideInRight 0.5s ease;
+        }
+
+        @@keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Responsive */
+        @@media (max-width: 640px) {
+            .login-card {
+                padding: 1.5rem;
+            }
+            
+            .login-title {
+                font-size: 1.8rem;
+            }
+            
+            .progress-steps {
+                gap: 0.5rem;
+            }
+            
+            .step-label {
+                font-size: 0.7rem;
+            }
+            
+            .quick-actions {
+                flex-direction: column;
+            }
+            
+            .quick-action-btn {
+                width: 100%;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Auto-focus on OTP input
+        document.addEventListener('DOMContentLoaded', function () {
+            const otpInput = document.querySelector('.otp-input');
+            otpInput.focus();
+            otpInput.select();
+
+            // Auto-submit when 6 digits entered
+            otpInput.addEventListener('input', function (e) {
+                if (this.value.length === 6) {
+                    setTimeout(() => {
+                        if (document.querySelector('#passwordSection').style.display === 'none') {
+                            document.getElementById('otpForm').submit();
+                        }
+                    }, 500);
+                }
+            });
+        });
+
+        // Use demo OTP
+        function useDemoOTP() {
+            const otpInput = document.querySelector('.otp-input');
+            otpInput.value = '123456';
+            otpInput.focus();
+            
+            // Show success animation
+            otpInput.parentElement.classList.add('success-animation');
+            setTimeout(() => {
+                otpInput.parentElement.classList.remove('success-animation');
+            }, 1000);
+        }
+
+        // Auto submit
+        function autoSubmit() {
+            const otpInput = document.querySelector('.otp-input');
+            otpInput.value = '123456';
+            
+            // If new user and password section is hidden, show next step
+            const isNewUser = document.querySelector('input[name="isNewUser"]').value === 'True';
+            const passwordSection = document.getElementById('passwordSection');
+            
+            if (isNewUser && passwordSection.style.display === 'none') {
+                showPasswordSection();
+            } else {
+                document.getElementById('otpForm').submit();
+            }
+        }
+
+        // Generate strong password
+        function generatePassword() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@@#$%^&*';
+            let password = '';
+            
+            // Ensure at least one of each required character type
+            password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
+            password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
+            password += '0123456789'[Math.floor(Math.random() * 10)];
+            password += '!@@#$%^&*'[Math.floor(Math.random() * 8)];
+            
+            // Add remaining characters
+            for (let i = 0; i < 4; i++) {
+                password += chars[Math.floor(Math.random() * chars.length)];
+            }
+            
+            // Shuffle the password
+            password = password.split('').sort(() => Math.random() - 0.5).join('');
+            
+            // Set password fields
+            document.getElementById('password').value = password;
+            document.getElementById('confirmPassword').value = password;
+            
+            // Trigger validation
+            checkPasswordStrength(password);
+            checkPasswordMatch();
+            
+            // Show success message
+            showToast('পাসওয়ার্ড জেনারেট করা হয়েছে!', 'success');
+        }
+
+        // Check password strength
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            const requirements = {
+                length: false,
+                uppercase: false,
+                lowercase: false,
+                number: false,
+                special: false
+            };
+
+            // Length requirement
+            if (password.length >= 8) {
+                strength += 20;
+                requirements.length = true;
+                document.getElementById('req-length').classList.add('valid');
+            } else {
+                document.getElementById('req-length').classList.remove('valid');
+            }
+
+            // Uppercase requirement
+            if (/[A-Z]/.test(password)) {
+                strength += 20;
+                requirements.uppercase = true;
+                document.getElementById('req-uppercase').classList.add('valid');
+            } else {
+                document.getElementById('req-uppercase').classList.remove('valid');
+            }
+
+            // Lowercase requirement
+            if (/[a-z]/.test(password)) {
+                strength += 20;
+                requirements.lowercase = true;
+                document.getElementById('req-lowercase').classList.add('valid');
+            } else {
+                document.getElementById('req-lowercase').classList.remove('valid');
+            }
+
+            // Number requirement
+            if (/[0-9]/.test(password)) {
+                strength += 20;
+                requirements.number = true;
+                document.getElementById('req-number').classList.add('valid');
+            } else {
+                document.getElementById('req-number').classList.remove('valid');
+            }
+
+            // Special character requirement
+            if (/[!@@#$%^&*]/.test(password)) {
+                strength += 20;
+                requirements.special = true;
+                document.getElementById('req-special').classList.add('valid');
+            } else {
+                document.getElementById('req-special').classList.remove('valid');
+            }
+
+            // Update strength meter
+            const strengthFill = document.getElementById('strengthFill');
+            const strengthText = document.getElementById('strengthText');
+            
+            strengthFill.style.width = strength + '%';
+            
+            if (strength < 40) {
+                strengthFill.style.background = '#ef4444';
+                strengthText.textContent = 'দুর্বল পাসওয়ার্ড';
+                strengthText.style.color = '#ef4444';
+            } else if (strength < 80) {
+                strengthFill.style.background = '#f59e0b';
+                strengthText.textContent = 'মাঝারি পাসওয়ার্ড';
+                strengthText.style.color = '#f59e0b';
+            } else {
+                strengthFill.style.background = '#10b981';
+                strengthText.textContent = 'শক্তিশালী পাসওয়ার্ড';
+                strengthText.style.color = '#10b981';
+            }
+        }
+
+        // Check password match
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const matchDiv = document.getElementById('passwordMatch');
+            
+            if (password && confirmPassword) {
+                if (password === confirmPassword) {
+                    matchDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>পাসওয়ার্ড মিলেছে</span>';
+                    matchDiv.style.color = '#10b981';
+                    matchDiv.classList.add('show');
+                } else {
+                    matchDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>পাসওয়ার্ড মিলছে না</span>';
+                    matchDiv.style.color = '#ef4444';
+                    matchDiv.classList.add('show');
+                }
+            } else {
+                matchDiv.classList.remove('show');
+            }
+        }
+
+        // Show password section for new users
+        function showPasswordSection() {
+            const passwordSection = document.getElementById('passwordSection');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Validate OTP first
+            const otp = document.querySelector('.otp-input').value;
+            if (otp.length !== 6) {
+                showToast('অনুগ্রহ করে ৬ ডিজিটের OTP দিন', 'error');
+                return;
+            }
+            
+            // Show password section with animation
+            passwordSection.style.display = 'block';
+            setTimeout(() => {
+                passwordSection.classList.add('slide-up');
+            }, 10);
+            
+            // Switch buttons
+            nextBtn.style.display = 'none';
+            submitBtn.style.display = 'flex';
+            
+            // Focus on password field
+            document.getElementById('password').focus();
+        }
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Add styles if not present
+            if (!document.querySelector('#toast-styles')) {
+                const style = document.createElement('style');
+                style.id = 'toast-styles';
+                style.textContent = `
+                    .toast {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: white;
+                        padding: 1rem 1.5rem;
+                        border-radius: 12px;
+                        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                        z-index: 9999;
+                        transform: translateX(120%);
+                        transition: transform 0.3s ease;
+                        border-left: 4px solid;
+                    }
+                    .toast-success {
+                        border-left-color: #10b981;
+                        color: #065f46;
+                    }
+                    .toast-error {
+                        border-left-color: #ef4444;
+                        color: #7f1d1d;
+                    }
+                    .toast.show {
+                        transform: translateX(0);
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // Show toast
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Auto dismiss
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Form validation before submit
+        document.getElementById('otpForm').addEventListener('submit', function (e) {
+            const isNewUser = document.querySelector('input[name="isNewUser"]').value === 'True';
+            
+            if (isNewUser) {
+                // Check if password section is visible
+                const passwordSection = document.getElementById('passwordSection');
+                if (passwordSection.style.display === 'block') {
+                    // Validate passwords
+                    const password = document.getElementById('password').value;
+                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    
+                    if (!password || password.length < 8) {
+                        e.preventDefault();
+                        showToast('অনুগ্রহ করে শক্তিশালী পাসওয়ার্ড দিন', 'error');
+                        return;
+                    }
+                    
+                    if (password !== confirmPassword) {
+                        e.preventDefault();
+                        showToast('পাসওয়ার্ড মিলছে না', 'error');
+                        return;
+                    }
+                    
+                    // Check password requirements
+                    const hasUppercase = /[A-Z]/.test(password);
+                    const hasLowercase = /[a-z]/.test(password);
+                    const hasNumber = /[0-9]/.test(password);
+                    const hasSpecial = /[!@@#$%^&*]/.test(password);
+                    
+                    if (!hasUppercase || !hasLowercase || !hasNumber || !hasSpecial) {
+                        e.preventDefault();
+                        showToast('পাসওয়ার্ড প্রয়োজনীয়তা পূরণ হয়নি', 'error');
+                        return;
+                    }
+                }
+            }
+            
+            // If everything is valid, show loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রক্রিয়াকরণ...';
+            submitBtn.disabled = true;
+        });
+
+        // Initialize password validation
+        document.getElementById('password')?.addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+            checkPasswordMatch();
+        });
+        
+        document.getElementById('confirmPassword')?.addEventListener('input', checkPasswordMatch);
+        
+        // Next button click handler
+        document.getElementById('nextBtn')?.addEventListener('click', showPasswordSection);
+    </script>
+}

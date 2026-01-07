@@ -1,0 +1,21 @@
+﻿@{
+    var type = ViewData["Type"] as string ?? "button";
+    var variant = ViewData["Variant"] as string ?? "primary";
+    var size = ViewData["Size"] as string ?? "md";
+    var icon = ViewData["Icon"] as string ?? "";
+    var text = ViewData["Text"] as string ?? "";
+    var isFullWidth = (ViewData["FullWidth"] as bool?) ?? false;
+    var className = ViewData["Class"] as string ?? "";
+    var onClick = ViewData["OnClick"] as string ?? "";
+}
+
+<button type="@type"
+        class="btn btn-@variant btn-@size @(isFullWidth ? "btn-full" : "") @className"
+        onclick="@onClick">
+    @if (!string.IsNullOrEmpty(icon))
+    {
+        <i class="@icon"></i>
+    }
+    @text
+    @RenderBody()
+</button>

@@ -1,0 +1,196 @@
+﻿@{
+    ViewData["Title"] = "অ্যাডমিন ড্যাশবোর্ড";
+    var adminName = ViewBag.AdminName;
+    var accessLevel = ViewBag.AccessLevel;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar">
+            <div class="sidebar-sticky pt-3">
+                <h4 class="text-white text-center mb-4">
+                    <i class="fas fa-user-shield"></i> অ্যাডমিন প্যানেল
+                </h4>
+
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="@Url.Action("Dashboard")">
+                            <i class="fas fa-tachometer-alt"></i> ড্যাশবোর্ড
+                        </a>
+                    </li>
+                    @if (accessLevel == "Super")
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Create")">
+                                <i class="fas fa-user-plus"></i> নতুন অ্যাডমিন
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("List")">
+                                <i class="fas fa-users"></i> সকল অ্যাডমিন
+                            </a>
+                        </li>
+                    }
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Profile")">
+                            <i class="fas fa-user-circle"></i> প্রোফাইল
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("ChangePassword")">
+                            <i class="fas fa-key"></i> পাসওয়ার্ড পরিবর্তন
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Logout")">
+                            <i class="fas fa-sign-out-alt"></i> লগআউট
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-tachometer-alt"></i> ড্যাশবোর্ড
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group mr-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-download"></i> রিপোর্ট
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Welcome Card -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <h4 class="card-title">স্বাগতম, @adminName!</h4>
+                            <p class="card-text">
+                                আপনি <strong>@accessLevel</strong> অ্যাডমিন হিসাবে লগইন করেছেন।
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row">
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h2><i class="fas fa-users"></i> 150</h2>
+                            <p class="card-text">মোট ব্যবহারকারী</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h2><i class="fas fa-user-check"></i> 120</h2>
+                            <p class="card-text">যাচাইকৃত ব্যবহারকারী</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <h2><i class="fas fa-clock"></i> 30</h2>
+                            <p class="card-text">পেন্ডিং যাচাইকরণ</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body text-center">
+                            <h2><i class="fas fa-exclamation-triangle"></i> 5</h2>
+                            <p class="card-text">ঝুঁকিপূর্ণ ব্যবহারকারী</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-history"></i> সাম্প্রতিক কার্যকলাপ</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    <i class="fas fa-user-check text-success"></i>
+                                    আহমেদ হাসান এর যাচাইকরণ সম্পন্ন হয়েছে
+                                    <span class="float-right text-muted">১০ মিনিট আগে</span>
+                                </div>
+                                <div class="list-group-item">
+                                    <i class="fas fa-user-plus text-info"></i>
+                                    নতুন ব্যবহারকারী রেজিস্টার হয়েছে
+                                    <span class="float-right text-muted">১ ঘণ্টা আগে</span>
+                                </div>
+                                <div class="list-group-item">
+                                    <i class="fas fa-exclamation-triangle text-warning"></i>
+                                    পুলিশ যাচাইকরণ ব্যর্থ হয়েছে
+                                    <span class="float-right text-muted">২ ঘণ্টা আগে</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        min-height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+
+        .sidebar .nav-link {
+            color: #ccc;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s;
+        }
+
+            .sidebar .nav-link:hover,
+            .sidebar .nav-link.active {
+                color: #fff;
+                background: rgba(255,255,255,0.1);
+            }
+
+            .sidebar .nav-link i {
+                margin-right: 10px;
+                width: 20px;
+                text-align: center;
+            }
+
+    main {
+        padding-top: 48px;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+</style>

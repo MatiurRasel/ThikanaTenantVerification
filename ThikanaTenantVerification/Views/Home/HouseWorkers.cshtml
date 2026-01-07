@@ -1,0 +1,327 @@
+﻿@model ThikanaTenantVerification.Models.User
+
+@{
+    ViewData["Title"] = "গৃহকর্মী/ড্রাইভার";
+    var policeData = ViewBag.PoliceData;
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-warning text-dark">
+            <h4><i class="fas fa-briefcase"></i> গৃহকর্মী/ড্রাইভারের তথ্য</h4>
+            <p class="mb-0">⚠️ পুলিশ যাচাইকরণ বাধ্যতামূলক</p>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>গুরুত্বপূর্ণ:</strong> সকল গৃহকর্মী/ড্রাইভারের জন্য এনআইডি পুলিশ ডাটাবেজে যাচাই করতে হবে।
+            </div>
+
+            <form id="houseWorkerForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">কর্মচারী ধরণ *</label>
+                            <select class="form-select" name="WorkerType" required>
+                                <option value="">ধরণ নির্বাচন করুন</option>
+                                <option value="ড্রাইভার">ড্রাইভার</option>
+                                <option value="গৃহকর্মী">গৃহকর্মী</option>
+                                <option value="প্রহরী">প্রহরী</option>
+                                <option value="বাগানের মালী">বাগানের মালী</option>
+                                <option value="রাঁধুনি">রাঁধুনি</option>
+                                <option value="অন্যান্য">অন্যান্য</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">নাম (বাংলায়) *</label>
+                            <input type="text" class="form-control" name="NameBN" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">এনআইডি নম্বর *</label>
+                            <input type="text" class="form-control" name="NIDNumber" required
+                                   pattern="\d{10,17}" title="১০-১৭ ডিজিটের এনআইডি নম্বর">
+                            <button type="button" class="btn btn-sm btn-outline-warning mt-1" onclick="verifyPolice()">
+                                <i class="fas fa-shield-alt"></i> পুলিশ যাচাই করুন
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">মোবাইল নম্বর *</label>
+                            <input type="tel" class="form-control" name="MobileNumber"
+                                   pattern="01[3-9]\d{8}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">স্থায়ী ঠিকানা *</label>
+                    <textarea class="form-control" name="PermanentAddress" rows="3" required></textarea>
+                </div>
+
+                <!-- Police Verification Result -->
+                <div id="policeResult" class="mb-3" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">পুলিশ যাচাইকরণ ফলাফল</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="verificationStatus"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-success" id="submitBtn">
+                        <i class="fas fa-user-check"></i> তালিকায় যোগ করুন
+                    </button>
+                    <a href="@Url.Action("Dashboard", new { id = Model.Id })" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> ড্যাশবোর্ড
+                    </a>
+                </div>
+            </form>
+
+            <hr>
+
+            <!-- Workers List -->
+            <h5 class="mt-4">কর্মচারী তালিকা</h5>
+            <div id="workersList" class="row mt-3">
+                @if (Model.HouseWorkers != null && Model.HouseWorkers.Any())
+                {
+                    foreach (var worker in Model.HouseWorkers)
+                    {
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-@(worker.IsDangerFlag ? "danger" : "success")">
+                                <div class="card-header bg-@(worker.IsDangerFlag ? "danger" : "success") text-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-@(worker.WorkerType == "ড্রাইভার" ? "car" : "user-tie")"></i>
+                                            <strong>@worker.WorkerType</strong>
+                                        </div>
+                                        <span class="badge bg-@(worker.IsDangerFlag ? "danger" : "success")">
+                                            @(worker.IsDangerFlag ? "ঝুঁকিপূর্ণ" : "নিরাপদ")
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <h6>@worker.NameBN</h6>
+                                    <p class="mb-1">
+                                        <i class="fas fa-id-card"></i> এনআইডি: @worker.NIDNumber<br>
+                                        <i class="fas fa-phone"></i> @worker.MobileNumber<br>
+                                        <i class="fas fa-home"></i> @worker.PermanentAddress
+                                    </p>
+                                    @if (!string.IsNullOrEmpty(worker.ValidationMessage))
+                                    {
+                                        <div class="alert alert-@(worker.IsDangerFlag ? "danger" : "info") mt-2">
+                                            <i class="fas fa-@(worker.IsDangerFlag ? "exclamation-triangle" : "check-circle")"></i>
+                                            @worker.ValidationMessage
+                                        </div>
+                                    }
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteWorker(@worker.Id)">
+                                        <i class="fas fa-trash"></i> মুছুন
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle"></i> কোন গৃহকর্মী/ড্রাইভার যোগ করা হয়নি।
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let policeVerified = false;
+        let verificationData = null;
+
+        function verifyPolice() {
+            const nidInput = document.querySelector('input[name="NIDNumber"]');
+            const nid = nidInput.value.trim();
+
+            if (!nid || nid.length < 10 || nid.length > 17) {
+                alert('অনুগ্রহ করে সঠিক এনআইডি নম্বর দিন (১০-১৭ ডিজিট)');
+                return;
+            }
+
+            // Show loading
+            const verifyBtn = document.querySelector('button[onclick="verifyPolice()"]');
+            const originalText = verifyBtn.innerHTML;
+            verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> যাচাই করা হচ্ছে...';
+            verifyBtn.disabled = true;
+
+            // Simulate police verification API call
+            setTimeout(() => {
+                // Mock police verification results
+                const mockResults = [
+                    { nid: "1991234567890", status: "clean", message: "পরিষ্কার রেকর্ড", danger: false },
+                    { nid: "1998765432109", status: "warning", message: "পেন্ডিং কেস রয়েছে", danger: true },
+                    { nid: "1995555555555", status: "risky", message: "অপরাধমূলক রেকর্ড পাওয়া গেছে", danger: true }
+                ];
+
+                // Find matching result or create random
+                let result = mockResults.find(r => r.nid === nid);
+                if (!result) {
+                    // Random result for demo
+                    const statuses = ["clean", "warning", "risky"];
+                    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+                    const messages = {
+                        clean: "পরিষ্কার রেকর্ড - কোনো অপরাধমূলক তথ্য নেই",
+                        warning: "সতর্কতা - সামান্য রেকর্ড পাওয়া গেছে",
+                        risky: "ঝুঁকিপূর্ণ - অপরাধমূলক রেকর্ড পাওয়া গেছে"
+                    };
+
+                    result = {
+                        nid: nid,
+                        status: randomStatus,
+                        message: messages[randomStatus],
+                        danger: randomStatus !== "clean"
+                    };
+                }
+
+                // Display result
+                const policeResult = document.getElementById('policeResult');
+                const statusDiv = document.getElementById('verificationStatus');
+
+                policeResult.style.display = 'block';
+
+                let statusHtml = '';
+                if (result.status === 'clean') {
+                    statusHtml = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> <strong>নিরাপদ</strong><br>
+                            ${result.message}<br>
+                            <small>যাচাই তারিখ: ${new Date().toLocaleDateString('bn-BD')}</small>
+                        </div>
+                    `;
+                } else if (result.status === 'warning') {
+                    statusHtml = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>সতর্কতা</strong><br>
+                            ${result.message}<br>
+                            <small>অনুগ্রহ করে সতর্ক থাকুন</small>
+                        </div>
+                    `;
+                } else {
+                    statusHtml = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-skull-crossbones"></i> <strong>ঝুঁকিপূর্ণ</strong><br>
+                            ${result.message}<br>
+                            <small>এই ব্যক্তিকে নিয়োগ দেওয়া থেকে বিরত থাকুন</small>
+                        </div>
+                    `;
+                }
+
+                statusDiv.innerHTML = statusHtml;
+
+                // Store verification data
+                policeVerified = true;
+                verificationData = result;
+
+                // Reset button
+                verifyBtn.innerHTML = originalText;
+                verifyBtn.disabled = false;
+
+            }, 2000);
+        }
+
+        document.getElementById('houseWorkerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (!policeVerified) {
+                alert('অনুগ্রহ করে পুলিশ যাচাইকরণ সম্পন্ন করুন');
+                return;
+            }
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            // Add police verification data
+            data.PoliceVerified = policeVerified;
+            data.VerificationMessage = verificationData.message;
+            data.IsDangerFlag = verificationData.danger;
+
+            // Show loading
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> যোগ করা হচ্ছে...';
+            submitBtn.disabled = true;
+
+            // Simulate API call
+            setTimeout(() => {
+                // Add to workers list
+                const workersList = document.getElementById('workersList');
+
+                // Remove warning if exists
+                const warning = workersList.querySelector('.alert-warning');
+                if (warning) {
+                    warning.remove();
+                }
+
+                // Create new worker card
+                const newWorker = document.createElement('div');
+                newWorker.className = 'col-md-6 mb-3';
+                newWorker.innerHTML = `
+                    <div class="card h-100 border-${verificationData.danger ? 'danger' : 'success'}">
+                        <div class="card-header bg-${verificationData.danger ? 'danger' : 'success'} text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-${data.WorkerType === 'ড্রাইভার' ? 'car' : 'user-tie'}"></i>
+                                    <strong>${data.WorkerType}</strong>
+                                </div>
+                                <span class="badge bg-${verificationData.danger ? 'danger' : 'success'}">
+                                    ${verificationData.danger ? 'ঝুঁকিপূর্ণ' : 'নিরাপদ'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h6>${data.NameBN}</h6>
+                            <p class="mb-1">
+                                <i class="fas fa-id-card"></i> এনআইডি: ${data.NIDNumber}<br>
+                                <i class="fas fa-phone"></i> ${data.MobileNumber}<br>
+                                <i class="fas fa-home"></i> ${data.PermanentAddress}
+                            </p>
+                            <div class="alert alert-${verificationData.danger ? 'danger' : 'info'} mt-2">
+                                <i class="fas fa-${verificationData.danger ? 'exclamation-triangle' : 'check-circle'}"></i>
+                                ${verificationData.message}
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger" onclick="this.closest('.col-md-6').remove()">
+                                <i class="fas fa-trash"></i> মুছুন
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                workersList.appendChild(newWorker);
+
+                // Reset form and verification
+                this.reset();
+                policeVerified = false;
+                verificationData = null;
+                document.getElementById('policeResult').style.display = 'none';
+
+                // Show success message
+                alert('কর্মচারী সফলভাবে যোগ করা হয়েছে!');
+
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 1000);
+        });
+    </script>
+}

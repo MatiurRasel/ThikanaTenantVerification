@@ -1,0 +1,217 @@
+﻿@model ThikanaTenantVerification.Models.User
+
+@{
+    ViewData["Title"] = "পরিবারের সদস্য";
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4><i class="fas fa-users"></i> পরিবারের সদস্যদের তথ্য</h4>
+        </div>
+        <div class="card-body">
+            <form id="familyMemberForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">নাম (বাংলায়) *</label>
+                            <input type="text" class="form-control" name="NameBN" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">সম্পর্ক *</label>
+                            <select class="form-select" name="Relationship" required>
+                                <option value="">সম্পর্ক নির্বাচন করুন</option>
+                                <option value="পিতা">পিতা</option>
+                                <option value="মাতা">মাতা</option>
+                                <option value="স্ত্রী">স্ত্রী</option>
+                                <option value="স্বামী">স্বামী</option>
+                                <option value="ছেলে">ছেলে</option>
+                                <option value="মেয়ে">মেয়ে</option>
+                                <option value="ভাই">ভাই</option>
+                                <option value="বোন">বোন</option>
+                                <option value="দাদা">দাদা</option>
+                                <option value="দাদী">দাদী</option>
+                                <option value="নানা">নানা</option>
+                                <option value="নানী">নানী</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">বয়স *</label>
+                            <input type="number" class="form-control" name="Age" min="1" max="120" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">পেশা</label>
+                            <input type="text" class="form-control" name="Occupation">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">মোবাইল নম্বর</label>
+                            <input type="tel" class="form-control" name="MobileNumber"
+                                   pattern="01[3-9]\d{8}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">এনআইডি নম্বর (ঐচ্ছিক)</label>
+                    <input type="text" class="form-control" name="NIDNumber">
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-1" onclick="verifyFamilyNID()">
+                        <i class="fas fa-search"></i> যাচাই করুন
+                    </button>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-user-plus"></i> সদস্য যোগ করুন
+                    </button>
+                    <a href="@Url.Action("Dashboard", new { id = Model.Id })" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> ড্যাশবোর্ড
+                    </a>
+                </div>
+            </form>
+
+            <hr>
+
+            <!-- Family Members List -->
+            <h5 class="mt-4">পরিবারের সদস্যগণ</h5>
+            <div id="familyList" class="row mt-3">
+                @if (Model.FamilyMembers != null && Model.FamilyMembers.Any())
+                {
+                    foreach (var member in Model.FamilyMembers)
+                    {
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6>@member.NameBN</h6>
+                                            <p class="mb-1 text-muted">
+                                                <i class="fas fa-user-tag"></i> @member.Relationship<br>
+                                                <i class="fas fa-birthday-cake"></i> @member.Age বছর<br>
+                                                @if (!string.IsNullOrEmpty(member.Occupation))
+                                                {
+                                                    <i class="fas fa-briefcase"></i> @member.Occupation
+
+                                                    <br>
+                                                }
+                                                @if (!string.IsNullOrEmpty(member.MobileNumber))
+                                                {
+                                                    <i class="fas fa-phone"></i> @member.MobileNumber
+                                                }
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="deleteFamilyMember(@member.Id)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle"></i> কোন পরিবারের সদস্য যোগ করা হয়নি।
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('familyMemberForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            // Validate age
+            if (data.Age < 1 || data.Age > 120) {
+                alert('বয়স ১-১২০ এর মধ্যে হতে হবে');
+                return;
+            }
+
+            // Show loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> যোগ করা হচ্ছে...';
+            submitBtn.disabled = true;
+
+            // Simulate API call
+            setTimeout(() => {
+                // Add to family list
+                const familyList = document.getElementById('familyList');
+
+                // Remove warning if exists
+                const warning = familyList.querySelector('.alert-warning');
+                if (warning) {
+                    warning.remove();
+                }
+
+                // Create new member card
+                const newMember = document.createElement('div');
+                newMember.className = 'col-md-6 mb-3';
+                newMember.innerHTML = `
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6>${data.NameBN}</h6>
+                                    <p class="mb-1 text-muted">
+                                        <i class="fas fa-user-tag"></i> ${data.Relationship}<br>
+                                        <i class="fas fa-birthday-cake"></i> ${data.Age} বছর<br>
+                                        ${data.Occupation ? `<i class="fas fa-briefcase"></i> ${data.Occupation}<br>` : ''}
+                                        ${data.MobileNumber ? `<i class="fas fa-phone"></i> ${data.MobileNumber}` : ''}
+                                    </p>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="this.closest('.col-md-6').remove()">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                familyList.appendChild(newMember);
+
+                // Reset form
+                this.reset();
+
+                // Show success message
+                alert('পরিবারের সদস্য সফলভাবে যোগ করা হয়েছে!');
+
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 1000);
+        });
+
+        function verifyFamilyNID() {
+            const nidInput = document.querySelector('input[name="NIDNumber"]');
+            if (nidInput.value.trim()) {
+                alert('পরিবারের সদস্যের এনআইডি যাচাই করা হচ্ছে... (ডেমো)');
+            } else {
+                alert('অনুগ্রহ করে এনআইডি নম্বর দিন');
+            }
+        }
+    </script>
+}

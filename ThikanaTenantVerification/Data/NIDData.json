@@ -1,0 +1,38 @@
+﻿[
+  {
+    "NIDNumber": "1991234567890",
+    "BirthCertificateNumber": "1991234567890123",
+    "FullNameBN": "আহমেদ হাসান",
+    "FullNameEN": "Ahmed Hasan",
+    "FatherNameBN": "মোঃ আব্দুল করিম",
+    "FatherNameEN": "Md. Abdul Karim",
+    "MotherNameBN": "সালমা বেগম",
+    "MotherNameEN": "Salma Begum",
+    "DateOfBirth": "1990-05-15",
+    "Gender": "পুরুষ",
+    "MaritalStatus": "বিবাহিত",
+    "Religion": "ইসলাম",
+    "MobileNumber": "01712345678",
+    "Email": "ahmed@gmail.com",
+    "PermanentAddress": "১২৩, ধানমন্ডি, ঢাকা",
+    "ProfileImage": "https://randomuser.me/api/portraits/men/1.jpg"
+  },
+  {
+    "NIDNumber": "1992345678901",
+    "BirthCertificateNumber": "1992345678901234",
+    "FullNameBN": "সুমাইয়া আক্তার",
+    "FullNameEN": "Sumaiya Akter",
+    "FatherNameBN": "মোঃ রফিকুল ইসলাম",
+    "FatherNameEN": "Md. Rafiqul Islam",
+    "MotherNameBN": "নুরজাহান বেগম",
+    "MotherNameEN": "Nurjahan Begum",
+    "DateOfBirth": "1992-08-20",
+    "Gender": "মহিলা",
+    "MaritalStatus": "অবিবাহিত",
+    "Religion": "ইসলাম",
+    "MobileNumber": "01812345678",
+    "Email": "sumaiya@gmail.com",
+    "PermanentAddress": "৪৫৬, মিরপুর, ঢাকা",
+    "ProfileImage": "https://randomuser.me/api/portraits/women/2.jpg"
+  }
+]

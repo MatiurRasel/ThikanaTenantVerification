@@ -1,0 +1,225 @@
+﻿@model ThikanaTenantVerification.Models.User
+
+@{
+    ViewData["Title"] = "বর্তমান ঠিকানা";
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h4><i class="fas fa-home"></i> বর্তমান ঠিকানার তথ্য</h4>
+            <p class="mb-0">📍 এই তথ্য আপনার যাচাইকরণ রিপোর্টে যাবে</p>
+        </div>
+        <div class="card-body">
+            <form method="post" action="@Url.Action("SaveCurrentResidence", "Home")">
+                <input type="hidden" name="userId" value="@Model.Id" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">ফ্ল্যাট/ফ্লোর নম্বর</label>
+                            <input type="text" class="form-control" name="FlatFloor"
+                                   placeholder="যেমন: ৫ম তলা, ফ্ল্যাট-৫বি">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">বাড়ি/হোল্ডিং নম্বর *</label>
+                            <input type="text" class="form-control" name="HouseHolding" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">রাস্তা/লেন *</label>
+                            <input type="text" class="form-control" name="Road" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">এলাকা *</label>
+                            <input type="text" class="form-control" name="Area" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">পোস্ট কোড</label>
+                            <input type="text" class="form-control" name="PostCode">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">থানা *</label>
+                            <select class="form-select" name="Thana" required>
+                                <option value="">থানা নির্বাচন করুন</option>
+                                <option value="ধানমন্ডি">ধানমন্ডি</option>
+                                <option value="গুলশান">গুলশান</option>
+                                <option value="মিরপুর">মিরপুর</option>
+                                <option value="উত্তরা">উত্তরা</option>
+                                <option value="মতিঝিল">মতিঝিল</option>
+                                <option value="রমনা">রমনা</option>
+                                <option value="তেজগাঁও">তেজগাঁও</option>
+                                <option value="বাড্ডা">বাড্ডা</option>
+                                <option value="খিলগাঁও">খিলগাঁও</option>
+                                <option value="শ্যামপুর">শ্যামপুর</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">জেলা *</label>
+                            <select class="form-select" name="District" required>
+                                <option value="">জেলা নির্বাচন করুন</option>
+                                <option value="ঢাকা">ঢাকা</option>
+                                <option value="গাজীপুর">গাজীপুর</option>
+                                <option value="নারায়ণগঞ্জ">নারায়ণগঞ্জ</option>
+                                <option value="মানিকগঞ্জ">মানিকগঞ্জ</option>
+                                <option value="মুন্সিগঞ্জ">মুন্সিগঞ্জ</option>
+                                <option value="নরসিংদী">নরসিংদী</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">বিভাগ *</label>
+                            <select class="form-select" name="Division" required>
+                                <option value="">বিভাগ নির্বাচন করুন</option>
+                                <option value="ঢাকা">ঢাকা</option>
+                                <option value="চট্টগ্রাম">চট্টগ্রাম</option>
+                                <option value="রাজশাহী">রাজশাহী</option>
+                                <option value="খুলনা">খুলনা</option>
+                                <option value="বরিশাল">বরিশাল</option>
+                                <option value="সিলেট">সিলেট</option>
+                                <option value="রংপুর">রংপুর</option>
+                                <option value="ময়মনসিংহ">ময়মনসিংহ</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">সর্বশেষ সম্পাদনা</label>
+                            <input type="text" class="form-control"
+                                   value="@DateTime.Now.ToString("dd-MMM-yyyy HH:mm")" readonly>
+                            <small class="form-text text-muted">স্বয়ংক্রিয়ভাবে আপডেট হবে</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <strong>ঠিকানা যাচাইকরণ:</strong> আপনার ঠিকানা স্থানীয় প্রশাসন দ্বারা যাচাই করা হবে।
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-save"></i> সংরক্ষণ করুন
+                    </button>
+                    <a href="@Url.Action("Dashboard", new { id = Model.Id })" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> ড্যাশবোর্ড
+                    </a>
+                </div>
+            </form>
+
+            <!-- Current Address Preview -->
+            @if (Model.CurrentResidence != null)
+            {
+                <hr>
+                <h5 class="mt-4">বর্তমান ঠিকানা (পূর্বে সংরক্ষিত)</h5>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>বাড়ি/হোল্ডিং:</strong> @Model.CurrentResidence.HouseHolding</p>
+                                <p><strong>রাস্তা:</strong> @Model.CurrentResidence.Road</p>
+                                <p><strong>এলাকা:</strong> @Model.CurrentResidence.Area</p>
+                                <p><strong>পোস্ট কোড:</strong> @Model.CurrentResidence.PostCode</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>থানা:</strong> @Model.CurrentResidence.Thana</p>
+                                <p><strong>জেলা:</strong> @Model.CurrentResidence.District</p>
+                                <p><strong>বিভাগ:</strong> @Model.CurrentResidence.Division</p>
+                                <p><strong>সর্বশেষ আপডেট:</strong> @Model.CurrentResidence.UpdatedAt.ToString("dd-MMM-yyyy HH:mm")</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-fill district based on thana selection
+        document.querySelector('select[name="Thana"]').addEventListener('change', function() {
+            const thana = this.value;
+            const districtSelect = document.querySelector('select[name="District"]');
+
+            // Map thanas to districts (for demo)
+            const thanaDistrictMap = {
+                'ধানমন্ডি': 'ঢাকা',
+                'গুলশান': 'ঢাকা',
+                'মিরপুর': 'ঢাকা',
+                'উত্তরা': 'ঢাকা',
+                'মতিঝিল': 'ঢাকা',
+                'রমনা': 'ঢাকা',
+                'তেজগাঁও': 'ঢাকা',
+                'বাড্ডা': 'ঢাকা',
+                'খিলগাঁও': 'ঢাকা',
+                'শ্যামপুর': 'ঢাকা'
+            };
+
+            if (thana && thanaDistrictMap[thana]) {
+                districtSelect.value = thanaDistrictMap[thana];
+            }
+        });
+
+        // Auto-fill division based on district selection
+        document.querySelector('select[name="District"]').addEventListener('change', function() {
+            const district = this.value;
+            const divisionSelect = document.querySelector('select[name="Division"]');
+
+            // Map districts to divisions (for demo)
+            const districtDivisionMap = {
+                'ঢাকা': 'ঢাকা',
+                'গাজীপুর': 'ঢাকা',
+                'নারায়ণগঞ্জ': 'ঢাকা',
+                'মানিকগঞ্জ': 'ঢাকা',
+                'মুন্সিগঞ্জ': 'ঢাকা',
+                'নরসিংদী': 'ঢাকা'
+            };
+
+            if (district && districtDivisionMap[district]) {
+                divisionSelect.value = districtDivisionMap[district];
+            }
+        });
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const requiredFields = this.querySelectorAll('[required]');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+                alert('অনুগ্রহ করে সব প্রয়োজনীয় তথ্য দিন (* চিহ্নিত ফিল্ড)');
+            }
+        });
+    </script>
+}

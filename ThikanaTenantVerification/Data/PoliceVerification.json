@@ -1,0 +1,17 @@
+﻿[
+  {
+    "NIDNumber": "1991234567890",
+    "IsValid": true,
+    "ValidationMessage": "পরিষ্কার রেকর্ড",
+    "CaseRecords": [],
+    "LastVerified": "2024-01-15"
+  },
+  {
+    "NIDNumber": "1998765432109",
+    "IsValid": false,
+    "ValidationMessage": "পেন্ডিং কেস রয়েছে",
+    "CaseRecords": [ "থানা কেস নং: ১৫/২০২৩" ],
+    "LastVerified": "2024-01-10",
+    "DangerLevel": "উচ্চ"
+  }
+]

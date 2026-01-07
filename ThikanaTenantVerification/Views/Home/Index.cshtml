@@ -1,0 +1,346 @@
+﻿@{
+    ViewData["Title"] = "ঠিকানা - ভাড়াটিয়া যাচাইকরণ";
+}
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://fonts.maateen.me/solaiman-lipi/font.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'SolaimanLipi', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #4a5568;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            color: #667eea;
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #4a5568;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .hero {
+            padding: 6rem 0;
+            text-align: center;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .features {
+            padding: 5rem 0;
+            background: white;
+            border-radius: 30px 30px 0 0;
+            margin-top: -30px;
+            position: relative;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+
+        .footer {
+            background: #2d3748;
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin: 2rem auto;
+            max-width: 800px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
+        }
+
+        .wave svg {
+            position: relative;
+            display: block;
+            width: calc(100% + 1.3px);
+            height: 150px;
+        }
+
+        .wave .shape-fill {
+            fill: #FFFFFF;
+        }
+
+        @@media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="sticky-header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo">
+                    <i class="fas fa-home logo-icon"></i>
+                    ঠিকানা
+                </a>
+                <div class="nav-links">
+                    <a href="#" class="nav-link">হোম</a>
+                    <a href="#" class="nav-link">কিভাবে কাজ করে</a>
+                    <a href="#" class="nav-link">যোগাযোগ</a>
+                    <!-- In your navigation menu -->
+                    <a href="@Url.Action("Registration", "Home")" class="nav-link">
+                        <i class="fas fa-user-plus"></i>
+                        রেজিস্ট্রেশন
+                    </a>
+                    <a href="@Url.Action("Login", "Home")" class="nav-link">লগইন</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>ভাড়াটিয়া যাচাইকরণ সিস্টেম</h1>
+                <p>জাতীয় পরিচয়পত্রের মাধ্যমে দ্রুত ও নিরাপদ ভাড়াটিয়া যাচাইকরণ। সরকারি ডাটাবেজের সাথে সরাসরি সংযুক্ত।</p>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-number">১০০%</div>
+                        <div>নিরাপত্তা</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">৫ মিনিট</div>
+                        <div>যাচাই সময়</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">১০০০+</div>
+                        <div>যাচাইকৃত ব্যবহারকারী</div>
+                    </div>
+                </div>
+
+                <div class="cta-buttons">
+                    <a href="@Url.Action("Login", "Home")" class="btn btn-primary">
+                        <i class="fas fa-user-check"></i>
+                        এখনই যাচাই করুন
+                    </a>
+                    <a href="#" class="btn btn-secondary">
+                        <i class="fas fa-info-circle"></i>
+                        বিস্তারিত জানুন
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <h2 style="text-align: center; margin-bottom: 1rem; color: #2d3748;">আমাদের সুবিধাসমূহ</h2>
+                <p style="text-align: center; max-width: 600px; margin: 0 auto 3rem; color: #718096;">
+                    দ্রুত, সহজ এবং নিরাপদ যাচাইকরণ প্রক্রিয়া
+                </p>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>১০০% নিরাপদ</h3>
+                        <p>সরকারি ডাটাবেজের সাথে সরাসরি সংযোগের মাধ্যমে সম্পূর্ণ নিরাপদ যাচাইকরণ</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3>দ্রুত প্রক্রিয়া</h3>
+                        <p>মাত্র ৫ মিনিটে সম্পূর্ণ ভাড়াটিয়া যাচাইকরণ সম্পন্ন করুন</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h3>মোবাইল OTP</h3>
+                        <p>মোবাইল নম্বরে OTP পাঠিয়ে দ্বিস্তর নিরাপত্তা নিশ্চিত করুন</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; ২০২৪ ঠিকানা - ভাড়াটিয়া যাচাইকরণ সিস্টেম</p>
+            <p style="margin-top: 1rem; opacity: 0.8;">সকল অধিকার সংরক্ষিত</p>
+        </div>
+    </footer>
+</body>
+</html>
