@@ -170,7 +170,7 @@ namespace ThikanaTenantVerification.Controllers
 
         [HttpPost]
         public async Task<IActionResult> VerifyOTP(string otp, string password, string confirmPassword,
-            bool isNewUser = false, int? userId = null)
+     bool isNewUser = false, int? userId = null)
         {
             // Default OTP value for bypassing verification
             const string DEFAULT_OTP = "123456";
@@ -180,7 +180,7 @@ namespace ThikanaTenantVerification.Controllers
             var storedUserId = TempData["UserId"]?.ToString();
 
             if (string.IsNullOrEmpty(mobileNumber))
-                return RedirectToAction("Login");
+                return RedirectToAction("Login", "Home");
 
             // Accept either the default OTP or any 6-digit OTP for testing
             bool isValidOtp = otp == DEFAULT_OTP || (otp?.Length == 6 && otp.All(char.IsDigit));
@@ -261,6 +261,19 @@ namespace ThikanaTenantVerification.Controllers
 
                 // Create new user from NID data with password
                 var nidData = JsonSerializer.Deserialize<NIDData>(nidDataJson);
+                if (nidData == null)
+                {
+                    ViewBag.Error = "NID তথ্য পাওয়া যায়নি";
+                    ViewBag.MobileNumber = mobileNumber;
+                    ViewBag.IsNewUser = true;
+
+                    TempData.Keep("MobileNumber");
+                    TempData.Keep("NIDData");
+                    TempData.Keep("IsNewUser");
+
+                    return View();
+                }
+
                 var newUser = await _dataService.CreateUserFromNIDDataWithPassword(nidData, password);
 
                 if (newUser == null)
@@ -286,8 +299,8 @@ namespace ThikanaTenantVerification.Controllers
                 return RedirectToAction("Dashboard", new { id = newUser.Id });
             }
 
-            // Fallback
-            return RedirectToAction("Login");
+            // Fallback - redirect to login
+            return RedirectToAction("Login", "Home");
         }
 
         [HttpGet]

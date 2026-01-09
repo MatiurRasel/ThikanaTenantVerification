@@ -9,11 +9,14 @@
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.22" />
+    <PackageReference Include="Microsoft.AspNetCore.Session" Version="2.3.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.22" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.22">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="QuestPDF" Version="2025.12.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
@@ -21,9 +24,12 @@
 
 	<ItemGroup>
 		<Folder Include="Migrations\" />
+		<Folder Include="ViewComponents\" />
 		<Folder Include="Uploads\" />
 		<Folder Include="Data\Mock\" />
 		<Folder Include="Logs\" />
+		<Folder Include="wwwroot\images\" />
+		<Folder Include="wwwroot\json\" />
 	</ItemGroup>
 
 </Project>

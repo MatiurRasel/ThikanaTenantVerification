@@ -890,3 +890,35 @@ BEGIN
     WHERE PasswordHash IS NULL;
 END
 GO
+
+
+-- Add missing columns to Users table
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+               WHERE TABLE_NAME = 'Users' AND COLUMN_NAME = 'FatherNameEN')
+BEGIN
+    ALTER TABLE Users
+    ADD FatherNameEN NVARCHAR(200) NULL;
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+               WHERE TABLE_NAME = 'Users' AND COLUMN_NAME = 'MotherNameEN')
+BEGIN
+    ALTER TABLE Users
+    ADD MotherNameEN NVARCHAR(200) NULL;
+END
+GO
+
+-- Also ensure PasswordHash column exists
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+               WHERE TABLE_NAME = 'Users' AND COLUMN_NAME = 'PasswordHash')
+BEGIN
+    ALTER TABLE Users
+    ADD PasswordHash NVARCHAR(255) NULL;
+    
+    -- Update existing users with default password hash
+    UPDATE Users 
+    SET PasswordHash = '$2a$11$YOUR_HASHED_PASSWORD_HERE' -- Hash for 'Default@123'
+    WHERE PasswordHash IS NULL;
+END
+GO

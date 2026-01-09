@@ -1,1010 +1,558 @@
-﻿@{
-    ViewData["Title"] = "রেজিস্ট্রেশন";
-    Layout = "_Layout";
-}
-
-@section Styles {
+﻿<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>নিবন্ধন - ঠিকানা যাচাইকরণ</title>
+    <link href="https://fonts.maateen.me/solaiman-lipi/font.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        .registration-container {
+        :root {
+            --police-blue: #0d2b6c;
+            --police-red: #e4002b;
+            --police-gold: #ffc107;
+            --police-light-blue: #1e88e5;
+            --dark-bg: #0a1a36;
+            --light-bg: #f0f4f8;
+            --white: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --gradient-blue: linear-gradient(135deg, #0d2b6c 0%, #1e3a8a 100%);
+            --gradient-gold: linear-gradient(135deg, #ffc107 0%, #ffd54f 100%);
+            --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.3);
+            --shadow-light: 0 8px 30px rgba(0, 0, 0, 0.1);
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SolaimanLipi', 'Inter', sans-serif;
+            background: var(--gradient-blue);
+            color: var(--text-dark);
+            line-height: 1.6;
             min-height: 100vh;
-            background: linear-gradient(135deg, #1a237e 0%, #283593 25%, #303f9f 50%, #3949ab 75%, #5c6bc0 100%);
+        }
+
+        /* Compact Header */
+        .police-header {
+            background: rgba(13, 43, 108, 0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--police-red);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0.6rem 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .police-emblem {
+            width: 45px;
+            height: 45px;
+            background: var(--white);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
+            border: 2px solid var(--police-gold);
+        }
+
+            .police-emblem i {
+                color: var(--police-blue);
+                font-size: 1.4rem;
+            }
+
+        .logo-text {
+            color: var(--white);
+            line-height: 1.2;
+        }
+
+        .logo-main {
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .logo-sub {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        /* Main Content */
+        .main-content {
+            min-height: calc(100vh - 120px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        /* Registration Container */
+        .registration-container {
+            width: 100%;
+            max-width: 500px;
         }
 
         .registration-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 3rem;
-            width: 100%;
-            max-width: 500px;
-            animation: fadeInUp 0.8s ease;
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-strong);
         }
 
+        /* Header */
         .registration-header {
             text-align: center;
             margin-bottom: 2rem;
         }
 
-        .registration-logo {
+        .registration-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .registration-logo-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.8rem;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+            color: var(--police-blue);
         }
 
         .registration-title {
-            font-size: 2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin: 0;
+            font-size: 1.8rem;
+            color: var(--police-blue);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
         }
 
         .registration-subtitle {
-            color: #64748b;
-            font-size: 1.1rem;
+            color: var(--text-light);
         }
 
-        .form-navigation {
+        /* Form */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
             display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid #e2e8f0;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: var(--police-blue);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
         }
 
-        .form-step {
-            padding: 1rem 2rem;
-            background: none;
-            border: none;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #64748b;
-            cursor: pointer;
+            .form-label i {
+                color: var(--police-red);
+            }
+
+        .input-group {
             position: relative;
+        }
+
+            .input-group i {
+                position: absolute;
+                left: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--text-light);
+                font-size: 1.1rem;
+            }
+
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
             transition: all 0.3s ease;
         }
 
-        .form-step.active {
-            color: #1a237e;
-        }
+            .form-control:focus {
+                outline: none;
+                border-color: var(--police-blue);
+                box-shadow: 0 0 0 3px rgba(13, 43, 108, 0.1);
+            }
 
-        .form-step.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
-        }
-
-        .step-content {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .step-content.active {
-            display: block;
-        }
-
+        /* Demo Credentials */
         .demo-credentials {
-            background: rgba(26, 35, 126, 0.05);
-            border-radius: 12px;
-            padding: 1rem;
+            background: rgba(13, 43, 108, 0.05);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
             margin: 1.5rem 0;
+            border: 1px solid rgba(13, 43, 108, 0.1);
         }
 
         .demo-header {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-            color: #1a237e;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            color: var(--police-blue);
             font-weight: 600;
         }
 
         .demo-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
+            gap: 1rem;
         }
 
         .demo-item {
-            background: white;
-            padding: 0.75rem;
-            border-radius: 8px;
+            background: var(--white);
+            padding: 1rem;
+            border-radius: var(--radius-sm);
             border: 1px solid #e2e8f0;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .demo-item:hover {
-            background: #f8fafc;
-            border-color: #cbd5e1;
-            transform: translateY(-2px);
-        }
+            .demo-item:hover {
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-light);
+                border-color: var(--police-blue);
+            }
 
         .demo-label {
-            color: #64748b;
-            font-size: 0.75rem;
-            margin-bottom: 0.25rem;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
         }
 
         .demo-value {
-            font-weight: 600;
-            color: #1a237e;
+            font-weight: 700;
+            color: var(--police-blue);
             font-family: 'Courier New', monospace;
         }
 
+        /* Buttons */
         .action-buttons {
             display: flex;
-            justify-content: space-between;
-            margin-top: 2rem;
             gap: 1rem;
+            margin-top: 2rem;
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
             padding: 0.875rem 1.75rem;
-            border-radius: 12px;
-            border: none;
+            border-radius: var(--radius-md);
             font-weight: 600;
             font-size: 1rem;
+            text-decoration: none;
+            border: none;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-decoration: none;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(26, 35, 126, 0.3);
+            flex: 1;
         }
 
         .btn-outline {
             background: transparent;
-            color: #64748b;
-            border: 2px solid #e2e8f0;
+            color: var(--police-blue);
+            border: 2px solid var(--police-blue);
         }
 
-        .btn-outline:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
+            .btn-outline:hover {
+                background: var(--police-blue);
+                color: var(--white);
+            }
+
+        .btn-primary {
+            background: var(--gradient-blue);
+            color: var(--white);
+            box-shadow: 0 10px 25px rgba(13, 43, 108, 0.3);
         }
 
-        .btn-lg {
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-        }
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 15px 35px rgba(13, 43, 108, 0.4);
+            }
 
-        .progress-bar {
-            height: 4px;
-            background: #e2e8f0;
-            border-radius: 2px;
-            margin: 1.5rem 0;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
-            border-radius: 2px;
-            transition: width 0.3s ease;
-        }
-
+        /* Alert */
         .alert {
             padding: 1rem;
-            border-radius: 12px;
+            border-radius: var(--radius-sm);
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            animation: slideInRight 0.5s ease;
+            animation: slideIn 0.5s ease;
         }
 
         .alert-danger {
-            background: #fee2e2;
-            border: 1px solid #fecaca;
-            color: #991b1b;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--error-color);
         }
 
         .alert-success {
-            background: #d1fae5;
-            border: 1px solid #a7f3d0;
-            color: #065f46;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
         }
 
-        .password-requirements {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 1rem;
-            margin-top: 1rem;
-            border: 1px solid #e2e8f0;
-        }
-
-        .requirements-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .requirements-list li {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-            font-size: 0.85rem;
-            color: #64748b;
-        }
-
-        .requirements-list li.valid {
-            color: #10b981;
-        }
-
-        .requirements-list li.valid i {
-            color: #10b981;
-        }
-
-        .otp-input-container {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
-            margin: 1rem 0;
-        }
-
-        .otp-input {
-            width: 50px;
-            height: 60px;
+        /* Login Link */
+        .login-link {
             text-align: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .otp-input:focus {
-            border-color: #1a237e;
-            box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
-            outline: none;
-        }
-
-        .otp-timer {
-            text-align: center;
-            margin: 1rem 0;
-            color: #64748b;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            color: var(--text-light);
             font-size: 0.9rem;
         }
 
-        .otp-timer strong {
-            color: #ef4444;
-        }
+            .login-link a {
+                color: var(--police-blue);
+                font-weight: 600;
+                text-decoration: none;
+            }
 
-        .resend-otp {
+        /* Footer */
+        .registration-footer {
+            background: var(--dark-bg);
+            color: var(--white);
+            padding: 1rem 0;
             text-align: center;
-            margin-top: 1rem;
+            font-size: 0.85rem;
         }
 
-        .resend-btn {
-            background: none;
-            border: none;
-            color: #1a237e;
-            cursor: pointer;
-            font-weight: 600;
-            text-decoration: underline;
+        /* Animations */
+        @@keyframes slideIn {
+            from
+
+        {
+            opacity: 0;
+            transform: translateX(-20px);
         }
 
-        .resend-btn:disabled {
-            color: #94a3b8;
-            cursor: not-allowed;
+        to {
+            opacity: 1;
+            transform: translateX(0);
         }
 
-        @@keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
-        @@keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .registration-card
+
+        {
+            padding: 1.5rem;
         }
 
-        @@keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+        .demo-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+
+        .header-container {
+            padding: 0 1rem;
+        }
+
+        }
+
+        @@media (max-height: 768px) {
+            .main-content
+
+        {
+            padding: 1rem;
+            min-height: calc(100vh - 100px);
+        }
+
+        .registration-card {
+            padding: 1.5rem;
+        }
+
         }
     </style>
-}
-
-<div class="registration-container">
-    <div class="registration-card">
-        <div class="registration-header">
-            <div class="registration-logo">
-                <div class="registration-logo-icon">
+</head>
+<body>
+    <!-- Compact Header -->
+    <header class="police-header">
+        <div class="header-container">
+            <a href="/" class="logo-container">
+                <div class="police-emblem">
                     <i class="fas fa-shield-alt"></i>
                 </div>
-                <h1 class="registration-title">ঠিকানা</h1>
-            </div>
-            <p class="registration-subtitle">নতুন ব্যবহারকারী রেজিস্ট্রেশন</p>
+                <div class="logo-text">
+                    <span class="logo-main">ঠিকানা যাচাইকরণ</span>
+                    <span class="logo-sub">বাংলাদেশ পুলিশ</span>
+                </div>
+            </a>
+
+            <a href="@Url.Action("Login", "Home")" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                <i class="fas fa-sign-in-alt"></i>
+                লগইন
+            </a>
         </div>
+    </header>
 
-        @if (ViewBag.Error != null)
-        {
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle"></i>
-                @ViewBag.Error
-            </div>
-        }
-
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i>
-                @TempData["Success"]
-            </div>
-        }
-
-        <!-- Progress Bar -->
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill" style="width: 33%"></div>
-        </div>
-
-        <!-- Form Navigation -->
-        <div class="form-navigation">
-            <button class="form-step active" onclick="switchStep(1)">
-                <i class="fas fa-id-card"></i>
-                NID তথ্য
-            </button>
-            <button class="form-step" onclick="switchStep(2)">
-                <i class="fas fa-sms"></i>
-                OTP যাচাই
-            </button>
-            <button class="form-step" onclick="switchStep(3)">
-                <i class="fas fa-lock"></i>
-                পাসওয়ার্ড
-            </button>
-        </div>
-
-        <!-- Step 1: NID Information -->
-        <div id="step1" class="step-content active">
-            <form id="nidForm">
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-id-card"></i>
-                        জাতীয় পরিচয়পত্র নম্বর *
-                    </label>
-                    <input type="text"
-                           name="idNumber"
-                           class="form-control"
-                           placeholder="১০, ১৩, ১৪ বা ১৭ ডিজিটের NID নম্বর"
-                           pattern="[0-9]{10}|[0-9]{13}|[0-9]{14}|[0-9]{17}"
-                           required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-mobile-alt"></i>
-                        মোবাইল নম্বর *
-                    </label>
-                    <input type="tel"
-                           name="mobileNumber"
-                           class="form-control"
-                           placeholder="০১XXXXXXXXX"
-                           pattern="01[3-9]\d{8}"
-                           required>
-                </div>
-
-                <!-- Demo Credentials -->
-                <div class="demo-credentials">
-                    <div class="demo-header">
-                        <i class="fas fa-user-secret"></i>
-                        <span>ডেমো ক্রেডেনশিয়ালস</span>
-                    </div>
-                    <div class="demo-grid">
-                        <div class="demo-item" onclick="fillDemoCredentials('1990123456789', '01712345678')">
-                            <div class="demo-label">ডেমো NID ১</div>
-                            <div class="demo-value">1990123456789</div>
-                        </div>
-                        <div class="demo-item" onclick="fillDemoCredentials('1991123456789', '01812345678')">
-                            <div class="demo-label">ডেমো NID ২</div>
-                            <div class="demo-value">1991123456789</div>
-                        </div>
-                    </div>
-                    <small class="text-muted">যেকোনো ১১ ডিজিটের মোবাইল নম্বর দিয়ে পরীক্ষা করুন</small>
-                </div>
-
-                <div class="action-buttons">
-                    <a href="@Url.Action("Login", "Home")" class="btn btn-outline">
-                        <i class="fas fa-arrow-left"></i>
-                        লগইনে ফিরে যান
-                    </a>
-                    <button type="button" onclick="verifyNID()" class="btn btn-primary btn-lg">
-                        <i class="fas fa-arrow-right"></i>
-                        পরবর্তী ধাপ
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Step 2: OTP Verification -->
-        <div id="step2" class="step-content">
-            <div class="text-center mb-4">
-                <div class="otp-icon mb-3">
-                    <i class="fas fa-sms fa-3x" style="color: #1a237e;"></i>
-                </div>
-                <h4>OTP যাচাই করুন</h4>
-                <p class="text-muted">
-                    আমরা একটি OTP কোড পাঠিয়েছি নিচের নম্বরে:<br>
-                    <strong id="otpMobileNumber"></strong>
-                </p>
-            </div>
-
-            <div class="demo-credentials">
-                <div class="demo-header">
-                    <i class="fas fa-code"></i>
-                    <span>ডেমো OTP কোড</span>
-                </div>
-                <div class="text-center">
-                    <code style="font-size: 1.5rem; font-weight: bold; color: #1a237e;">123456</code>
-                </div>
-                <small class="text-muted">ডেভেলপমেন্টের জন্য এই কোডটি ব্যবহার করুন</small>
-            </div>
-
-            <form id="otpForm">
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-key"></i>
-                        ৬ ডিজিটের OTP কোড *
-                    </label>
-                    <div class="otp-input-container">
-                        <input type="text" class="otp-input" maxlength="1" pattern="\d">
-                        <input type="text" class="otp-input" maxlength="1" pattern="\d">
-                        <input type="text" class="otp-input" maxlength="1" pattern="\d">
-                        <input type="text" class="otp-input" maxlength="1" pattern="\d">
-                        <input type="text" class="otp-input" maxlength="1" pattern="\d">
-                        <input type="text" class="otp-input" maxlength="1" pattern="\d">
-                    </div>
-                    <input type="hidden" name="otp" id="otpInput">
-                </div>
-
-                <div class="otp-timer">
-                    OTP কোডটি <strong id="otpTimer">05:00</strong> মিনিটের জন্য বৈধ
-                </div>
-
-                <div class="resend-otp">
-                    <button type="button" id="resendBtn" class="resend-btn" disabled>
-                        <i class="fas fa-redo"></i>
-                        <span id="resendText">আবার পাঠান (60)</span>
-                    </button>
-                </div>
-
-                <div class="action-buttons">
-                    <button type="button" onclick="switchStep(1)" class="btn btn-outline">
-                        <i class="fas fa-arrow-left"></i>
-                        পূর্ববর্তী
-                    </a>
-                    <button type="button" onclick="verifyOTP()" class="btn btn-primary btn-lg">
-                        <i class="fas fa-arrow-right"></i>
-                        পরবর্তী ধাপ
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Step 3: Password Setup -->
-        <div id="step3" class="step-content">
-            <div class="text-center mb-4">
-                <div class="password-icon mb-3">
-                    <i class="fas fa-lock fa-3x" style="color: #1a237e;"></i>
-                </div>
-                <h4>পাসওয়ার্ড সেট করুন</h4>
-                <p class="text-muted">নিরাপদ পাসওয়ার্ড দিন</p>
-            </div>
-
-            <form id="passwordForm">
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-lock"></i>
-                        পাসওয়ার্ড *
-                    </label>
-                    <input type="password"
-                           name="password"
-                           id="password"
-                           class="form-control"
-                           placeholder="পাসওয়ার্ড দিন"
-                           minlength="8"
-                           required
-                           onkeyup="checkPasswordStrength(this.value)">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-lock"></i>
-                        পাসওয়ার্ড নিশ্চিত করুন *
-                    </label>
-                    <input type="password"
-                           name="confirmPassword"
-                           id="confirmPassword"
-                           class="form-control"
-                           placeholder="পুনরায় পাসওয়ার্ড দিন"
-                           minlength="8"
-                           required
-                           onkeyup="checkPasswordMatch()">
-                    <div class="password-match" id="passwordMatch" style="display: none; color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem;">
-                        <i class="fas fa-times-circle"></i>
-                        <span>পাসওয়ার্ড মিলছে না</span>
-                    </div>
-                </div>
-
-                <!-- Password Requirements -->
-                <div class="password-requirements">
-                    <h6><i class="fas fa-list-check"></i> পাসওয়ার্ডের প্রয়োজনীয়তা:</h6>
-                    <ul class="requirements-list">
-                        <li id="req-length"><i class="fas fa-circle"></i> কমপক্ষে ৮ অক্ষর</li>
-                        <li id="req-uppercase"><i class="fas fa-circle"></i> অন্তত ১ টি বড় হাতের অক্ষর</li>
-                        <li id="req-lowercase"><i class="fas fa-circle"></i> অন্তত ১ টি ছোট হাতের অক্ষর</li>
-                        <li id="req-number"><i class="fas fa-circle"></i> অন্তত ১ টি সংখ্যা</li>
-                        <li id="req-special"><i class="fas fa-circle"></i> অন্তত ১ টি বিশেষ অক্ষর (!@@#$%^&*)</li>
-                    </ul>
-                </div>
-
-                <div class="action-buttons">
-                    <button type="button" onclick="switchStep(2)" class="btn btn-outline">
-                        <i class="fas fa-arrow-left"></i>
-                        পূর্ববর্তী
-                    </button>
-                    <button type="button" onclick="completeRegistration()" class="btn btn-success btn-lg">
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="registration-container">
+            <div class="registration-card">
+                <div class="registration-header">
+                    <div class="registration-icon">
                         <i class="fas fa-user-plus"></i>
-                        রেজিস্ট্রেশন সম্পূর্ণ করুন
-                    </button>
+                    </div>
+                    <h2 class="registration-title">নতুন নিবন্ধন</h2>
+                    <p class="registration-subtitle">আপনার জাতীয় পরিচয়পত্র ও মোবাইল নম্বর দিন</p>
                 </div>
-            </form>
-        </div>
 
-        <!-- Registration Footer -->
-        <div class="text-center mt-4">
-            <p class="text-muted">
-                ইতিমধ্যে একাউন্ট আছে? 
-                <a href="@Url.Action("Login", "Home")" class="text-primary font-weight-bold">
-                    লগইন করুন
-                </a>
-            </p>
-        </div>
-    </div>
-</div>
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        @ViewBag.Error
+                    </div>
+                }
 
-@section Scripts {
+                <form method="post" action="@Url.Action("Login", "Home")">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-id-card"></i>
+                            জাতীয় পরিচয়পত্র নম্বর
+                        </label>
+                        <div class="input-group">
+                            <i class="fas fa-id-card"></i>
+                            <input type="text"
+                                   name="idNumber"
+                                   class="form-control"
+                                   placeholder="১০, ১৩, ১৪ বা ১৭ ডিজিটের নম্বর"
+                                   pattern="[0-9]{10}|[0-9]{13}|[0-9]{14}|[0-9]{17}"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-mobile-alt"></i>
+                            মোবাইল নম্বর
+                        </label>
+                        <div class="input-group">
+                            <i class="fas fa-phone"></i>
+                            <input type="tel"
+                                   name="mobileNumber"
+                                   class="form-control"
+                                   placeholder="০১XXXXXXXXX"
+                                   pattern="01[3-9]\d{8}"
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Demo Credentials -->
+                    <div class="demo-credentials">
+                        <div class="demo-header">
+                            <i class="fas fa-user-secret"></i>
+                            <span>ডেমো একাউন্ট</span>
+                        </div>
+                        <div class="demo-grid">
+                            <div class="demo-item" onclick="fillDemoCredentials('1990123456789', '01712345678')">
+                                <div class="demo-label">ডেমো একাউন্ট ১</div>
+                                <div class="demo-value">NID: 1990123456789</div>
+                            </div>
+                            <div class="demo-item" onclick="fillDemoCredentials('1991123456789', '01812345678')">
+                                <div class="demo-label">ডেমো একাউন্ট ২</div>
+                                <div class="demo-value">NID: 1991123456789</div>
+                            </div>
+                        </div>
+                        <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-light);">
+                            যেকোনো ১১ ডিজিটের মোবাইল নম্বর দিয়ে পরীক্ষা করুন
+                        </p>
+                    </div>
+
+                    <div class="action-buttons">
+                        <a href="@Url.Action("Login", "Home")" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i>
+                            লগইনে ফিরে যান
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-arrow-right"></i>
+                            পরবর্তী ধাপ
+                        </button>
+                    </div>
+                </form>
+
+                <div class="login-link">
+                    <p>
+                        ইতিমধ্যে একাউন্ট আছে?
+                        <a href="@Url.Action("Login", "Home")">লগইন করুন</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="registration-footer">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 0 1.5rem;">
+            <p>&copy; <script>document.write(new Date().getFullYear());</script> ঠিকানা যাচাইকরণ সিস্টেম - বাংলাদেশ পুলিশ। সকল অধিকার সংরক্ষিত।</p>
+        </div>
+    </footer>
+
     <script>
-        let currentStep = 1;
-        let nidData = null;
-        let otpTimer = null;
-        let timeLeft = 300; // 5 minutes in seconds
-        let canResend = false;
-
-        // Initialize form
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeOTPInputs();
-            startOTPTimer();
-            updateProgressBar();
-        });
-
         // Fill demo credentials
         function fillDemoCredentials(nid, mobile) {
             document.querySelector('input[name="idNumber"]').value = nid;
             document.querySelector('input[name="mobileNumber"]').value = mobile;
         }
 
-        // Switch between steps
-        function switchStep(step) {
-            if (step < 1 || step > 3) return;
-            
-            // Hide all steps
-            document.querySelectorAll('.step-content').forEach(el => {
-                el.classList.remove('active');
+        // Input auto-formatting
+        document.addEventListener('DOMContentLoaded', function() {
+            // Format mobile number
+            document.querySelector('input[name="mobileNumber"]').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 11) value = value.slice(0, 11);
+                e.target.value = value;
             });
-            
-            // Remove active from all navigation buttons
-            document.querySelectorAll('.form-step').forEach(el => {
-                el.classList.remove('active');
+
+            // Format NID
+            document.querySelector('input[name="idNumber"]').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 17) value = value.slice(0, 17);
+                e.target.value = value;
             });
-            
-            // Show selected step
-            document.getElementById(`step${step}`).classList.add('active');
-            document.querySelectorAll('.form-step')[step - 1].classList.add('active');
-            
-            currentStep = step;
-            updateProgressBar();
-        }
 
-        // Update progress bar
-        function updateProgressBar() {
-            const progress = (currentStep / 3) * 100;
-            document.getElementById('progressFill').style.width = `${progress}%`;
-        }
-
-        // Verify NID and move to OTP step
-        async function verifyNID() {
-            const idNumber = document.querySelector('input[name="idNumber"]').value;
-            const mobileNumber = document.querySelector('input[name="mobileNumber"]').value;
-
-            // Validate inputs
-            if (!idNumber || !mobileNumber) {
-                showAlert('অনুগ্রহ করে NID এবং মোবাইল নম্বর দিন', 'danger');
-                return;
-            }
-
-            // Validate NID length
-            if (![10, 13, 14, 17].includes(idNumber.length)) {
-                showAlert('অনুগ্রহ করে সঠিক জাতীয় পরিচয়পত্র বা জন্ম নিবন্ধন নম্বর দিন (১০/১৩/১৪/১৭ ডিজিট)', 'danger');
-                return;
-            }
-
-            // Validate mobile number
-            if (!/^01[3-9]\d{8}$/.test(mobileNumber)) {
-                showAlert('অনুগ্রহ করে সঠিক মোবাইল নম্বর দিন', 'danger');
-                return;
-            }
-
-            // Show loading
-            const nextBtn = document.querySelector('#step1 .btn-primary');
-            const originalText = nextBtn.innerHTML;
-            nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> যাচাই করা হচ্ছে...';
-            nextBtn.disabled = true;
-
-            try {
-                // Send verification request
-                const response = await fetch('@Url.Action("VerifyNID", "Home")', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        idNumber: idNumber,
-                        mobileNumber: mobileNumber
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    // Store NID data and move to OTP step
-                    nidData = result.nidData;
-                    document.getElementById('otpMobileNumber').textContent = mobileNumber;
-                    
-                    // Simulate sending OTP
-                    setTimeout(() => {
-                        showAlert('OTP আপনার মোবাইল নম্বরে পাঠানো হয়েছে', 'success');
-                        switchStep(2);
-                        
-                        // Auto-fill OTP for demo
-                        setTimeout(() => {
-                            fillOTP('123456');
-                        }, 500);
-                    }, 1000);
-                } else {
-                    showAlert(result.message || 'NID যাচাইকরণ ব্যর্থ হয়েছে', 'danger');
-                }
-            } catch (error) {
-                showAlert('একটি ত্রুটি হয়েছে। পরে চেষ্টা করুন', 'danger');
-                console.error('NID verification error:', error);
-            } finally {
-                // Reset button
-                nextBtn.innerHTML = originalText;
-                nextBtn.disabled = false;
-            }
-        }
-
-        // Initialize OTP inputs
-        function initializeOTPInputs() {
-            const otpInputs = document.querySelectorAll('.otp-input');
-            otpInputs.forEach((input, index) => {
-                input.addEventListener('input', function(e) {
-                    if (this.value.length === 1) {
-                        if (index < otpInputs.length - 1) {
-                            otpInputs[index + 1].focus();
-                        }
-                    }
-                    
-                    updateOTPValue();
-                });
-
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Backspace' && !this.value && index > 0) {
-                        otpInputs[index - 1].focus();
-                    }
-                });
-            });
-        }
-
-        // Update OTP value from inputs
-        function updateOTPValue() {
-            const otpInputs = document.querySelectorAll('.otp-input');
-            let otp = '';
-            otpInputs.forEach(input => {
-                otp += input.value;
-            });
-            document.getElementById('otpInput').value = otp;
-        }
-
-        // Fill OTP automatically
-        function fillOTP(code) {
-            const otpInputs = document.querySelectorAll('.otp-input');
-            const digits = code.split('');
-            
-            otpInputs.forEach((input, index) => {
-                if (index < digits.length) {
-                    input.value = digits[index];
-                }
-            });
-            
-            updateOTPValue();
-        }
-
-        // Start OTP timer
-        function startOTPTimer() {
-            const timerElement = document.getElementById('otpTimer');
-            const resendBtn = document.getElementById('resendBtn');
-            const resendText = document.getElementById('resendText');
-            
-            otpTimer = setInterval(() => {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                
-                timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(otpTimer);
-                    timerElement.textContent = '00:00';
-                    resendBtn.disabled = false;
-                    canResend = true;
-                    startResendCooldown();
-                } else {
-                    timeLeft--;
-                }
-            }, 1000);
-        }
-
-        // Start resend cooldown
-        function startResendCooldown() {
-            let cooldown = 60;
-            const resendText = document.getElementById('resendText');
-            const resendBtn = document.getElementById('resendBtn');
-            
-            const cooldownTimer = setInterval(() => {
-                resendText.textContent = `আবার পাঠান (${cooldown})`;
-                cooldown--;
-                
-                if (cooldown < 0) {
-                    clearInterval(cooldownTimer);
-                    resendText.textContent = 'আবার পাঠান';
-                    resendBtn.disabled = false;
-                }
-            }, 1000);
-        }
-
-        // Verify OTP and move to password step
-        async function verifyOTP() {
-            const otp = document.getElementById('otpInput').value;
-
-            if (otp.length !== 6) {
-                showAlert('অনুগ্রহ করে ৬ ডিজিটের OTP দিন', 'danger');
-                return;
-            }
-
-            // For demo, accept 123456 or any 6-digit number
-            if (otp === '123456' || /^\d{6}$/.test(otp)) {
-                showAlert('OTP যাচাই সফল!', 'success');
-                setTimeout(() => {
-                    switchStep(3);
-                }, 1000);
-            } else {
-                showAlert('ভুল OTP। ডেমো OTP: 123456', 'danger');
-            }
-        }
-
-        // Check password strength
-        function checkPasswordStrength(password) {
-            const requirements = {
-                length: password.length >= 8,
-                uppercase: /[A-Z]/.test(password),
-                lowercase: /[a-z]/.test(password),
-                number: /[0-9]/.test(password),
-                special: /[!@@#$%^&*]/.test(password)
-            };
-
-            // Update requirement indicators
-            Object.keys(requirements).forEach(key => {
-                const element = document.getElementById(`req-${key}`);
-                if (requirements[key]) {
-                    element.classList.add('valid');
-                    element.innerHTML = '<i class="fas fa-check-circle"></i> ' + element.textContent;
-                } else {
-                    element.classList.remove('valid');
-                    element.innerHTML = '<i class="fas fa-circle"></i> ' + element.textContent;
-                }
-            });
-        }
-
-        // Check password match
-        function checkPasswordMatch() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const matchDiv = document.getElementById('passwordMatch');
-
-            if (password && confirmPassword) {
-                if (password === confirmPassword) {
-                    matchDiv.style.display = 'flex';
-                    matchDiv.style.color = '#10b981';
-                    matchDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>পাসওয়ার্ড মিলেছে</span>';
-                } else {
-                    matchDiv.style.display = 'flex';
-                    matchDiv.style.color = '#ef4444';
-                    matchDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>পাসওয়ার্ড মিলছে না</span>';
-                }
-            } else {
-                matchDiv.style.display = 'none';
-            }
-        }
-
-        // Complete registration
-        async function completeRegistration() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-
-            // Validate password
-            if (!password || password.length < 8) {
-                showAlert('অনুগ্রহ করে কমপক্ষে ৮ অক্ষরের পাসওয়ার্ড দিন', 'danger');
-                return;
-            }
-
-            if (password !== confirmPassword) {
-                showAlert('পাসওয়ার্ড মিলছে না', 'danger');
-                return;
-            }
-
-            // Check password requirements
-            const hasUppercase = /[A-Z]/.test(password);
-            const hasLowercase = /[a-z]/.test(password);
-            const hasNumber = /[0-9]/.test(password);
-            const hasSpecial = /[!@@#$%^&*]/.test(password);
-
-            if (!hasUppercase || !hasLowercase || !hasNumber || !hasSpecial) {
-                showAlert('পাসওয়ার্ডে কমপক্ষে ১টি বড় হাতের অক্ষর, ১টি ছোট হাতের অক্ষর, ১টি সংখ্যা এবং ১টি বিশেষ অক্ষর থাকতে হবে', 'danger');
-                return;
-            }
-
-            // Show loading
-            const completeBtn = document.querySelector('#step3 .btn-success');
-            const originalText = completeBtn.innerHTML;
-            completeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> রেজিস্ট্রেশন করা হচ্ছে...';
-            completeBtn.disabled = true;
-
-            try {
-                // Get form data
-                const idNumber = document.querySelector('input[name="idNumber"]').value;
-                const mobileNumber = document.querySelector('input[name="mobileNumber"]').value;
-
-                // Send registration request
-                const response = await fetch('@Url.Action("CompleteRegistration", "Home")', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        idNumber: idNumber,
-                        mobileNumber: mobileNumber,
-                        password: password,
-                        confirmPassword: confirmPassword
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showAlert('রেজিস্ট্রেশন সফল! লগইন পৃষ্ঠায় নিয়ে যাওয়া হচ্ছে...', 'success');
-                    
-                    // Redirect to login after 2 seconds
-                    setTimeout(() => {
-                        window.location.href = '@Url.Action("Login", "Home")';
-                    }, 2000);
-                } else {
-                    showAlert(result.message || 'রেজিস্ট্রেশন ব্যর্থ হয়েছে', 'danger');
-                }
-            } catch (error) {
-                showAlert('একটি ত্রুটি হয়েছে। পরে চেষ্টা করুন', 'danger');
-                console.error('Registration error:', error);
-            } finally {
-                // Reset button
-                completeBtn.innerHTML = originalText;
-                completeBtn.disabled = false;
-            }
-        }
-
-        // Show alert message
-        function showAlert(message, type) {
-            // Remove existing alerts
-            const existingAlerts = document.querySelectorAll('.alert');
-            existingAlerts.forEach(alert => alert.remove());
-
-            // Create new alert
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type}`;
-            alertDiv.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                ${message}
-            `;
-
-            // Insert after header
-            const header = document.querySelector('.registration-header');
-            header.parentNode.insertBefore(alertDiv, header.nextSibling);
-
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.remove();
-                }
-            }, 5000);
-        }
-
-        // Resend OTP
-        document.getElementById('resendBtn').addEventListener('click', function() {
-            if (!canResend) return;
-
-            // Reset timer
-            clearInterval(otpTimer);
-            timeLeft = 300;
-            canResend = false;
-            this.disabled = true;
-            
-            // Start new timer
-            startOTPTimer();
-            
-            // Show message
-            showAlert('নতুন OTP পাঠানো হয়েছে', 'success');
-            
-            // Auto-fill demo OTP
-            setTimeout(() => {
-                fillOTP('123456');
-            }, 1000);
+            // Auto-fill demo for testing
+            fillDemoCredentials('1990123456789', '01712345678');
         });
     </script>
-}
+</body>
+</html>

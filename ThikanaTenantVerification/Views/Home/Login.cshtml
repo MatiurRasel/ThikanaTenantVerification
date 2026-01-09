@@ -1,267 +1,793 @@
-﻿@{
-    ViewData["Title"] = "লগইন - ঠিকানা যাচাইকরণ";
-    Layout = "_Layout";
-}
-
-@section Styles {
+﻿<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>লগইন - ঠিকানা যাচাইকরণ</title>
+    <link href="https://fonts.maateen.me/solaiman-lipi/font.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        .login-page {
-            min-height: 100vh;
-            background: var(--primary-gradient);
-            position: relative;
-            overflow: hidden;
+        :root {
+            --police-blue: #0d2b6c;
+            --police-red: #e4002b;
+            --police-gold: #ffc107;
+            --police-light-blue: #1e88e5;
+            --dark-bg: #0a1a36;
+            --light-bg: #f0f4f8;
+            --white: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --gradient-blue: linear-gradient(135deg, #0d2b6c 0%, #1e3a8a 100%);
+            --gradient-gold: linear-gradient(135deg, #ffc107 0%, #ffd54f 100%);
+            --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.3);
+            --shadow-light: 0 8px 30px rgba(0, 0, 0, 0.1);
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
         }
 
-        .login-background {
-            position: absolute;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SolaimanLipi', 'Inter', sans-serif;
+            background: var(--gradient-blue);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Compact Sticky Header */
+        .police-header {
+            background: rgba(13, 43, 108, 0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--police-red);
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='1440' height='1024' viewBox='0 0 1440 1024' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0H1440V1024H0V0Z' fill='url(%23paint0_linear_1_2)'/%3E%3Cpath d='M-94.7319 291.839C8.07076 198.228 214.167 107.882 364.636 145.267C515.106 182.652 497.466 330.076 582.314 423.687C667.162 517.298 841.146 493.306 991.616 456.179C1142.09 419.052 1267.83 377.024 1370.63 283.413L1440 1024H0V748.067C-20.3259 651.638 -197.535 385.45 -94.7319 291.839Z' fill='white' fill-opacity='0.05'/%3E%3Cdefs%3E%3ClinearGradient id='paint0_linear_1_2' x1='720' y1='0' x2='720' y2='1024' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%231a237e'/%3E%3Cstop offset='1' stop-color='%23000d47'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E") no-repeat center/cover;
+            z-index: 1000;
+            padding: 0.6rem 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
 
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .police-emblem {
+            width: 45px;
+            height: 45px;
+            background: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--police-gold);
+        }
+
+            .police-emblem i {
+                color: var(--police-blue);
+                font-size: 1.4rem;
+            }
+
+        .logo-text {
+            color: var(--white);
+            line-height: 1.2;
+        }
+
+        .logo-main {
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .logo-sub {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            min-height: calc(100vh - 120px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        /* Login Container */
         .login-container {
-            position: relative;
-            z-index: 1;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: var(--space-xl);
-        }
-
-        .login-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: var(--border-radius-xl);
-            box-shadow: var(--shadow-xl);
             width: 100%;
-            max-width: 480px;
-            padding: var(--space-xl);
-            animation: fadeIn 0.6s ease;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: center;
         }
 
-        .login-header {
-            text-align: center;
-            margin-bottom: var(--space-xl);
+        /* Left Panel - Information */
+        .info-panel {
+            color: var(--white);
         }
 
-        .login-logo {
+        .info-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .info-icon {
+            width: 70px;
+            height: 70px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: var(--space-sm);
-            margin-bottom: var(--space-md);
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            color: var(--police-blue);
         }
 
-        .login-logo-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--primary-gradient);
-            border-radius: var(--border-radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-        }
-
-        .login-title {
+        .info-title {
             font-size: 2rem;
             font-weight: 700;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: var(--space-xs);
+            margin-bottom: 1rem;
+            line-height: 1.2;
         }
 
-        .login-subtitle {
-            color: var(--text-light);
-            font-size: 1rem;
+        .info-subtitle {
+            opacity: 0.9;
+            margin-bottom: 2rem;
         }
 
-        .form-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: var(--space-lg);
-        }
-
-        .form-footer {
-            text-align: center;
-            margin-top: var(--space-lg);
-            color: var(--text-light);
-            font-size: 0.875rem;
-        }
-
-        .login-features {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: var(--space-sm);
-            margin-top: var(--space-xl);
-            padding-top: var(--space-lg);
-            border-top: 1px solid #e2e8f0;
+        .info-features {
+            margin-top: 2rem;
         }
 
         .feature-item {
-            text-align: center;
-            padding: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
         }
 
         .feature-icon {
             width: 40px;
             height: 40px;
-            background: var(--primary-gradient);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            margin: 0 auto var(--space-xs);
+            font-size: 1.1rem;
+            color: var(--police-gold);
         }
 
-        .feature-text {
-            font-size: 0.75rem;
+        .feature-text h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .feature-text p {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* Right Panel - Login Forms */
+        .login-panel {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-strong);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-title {
+            font-size: 1.8rem;
+            color: var(--police-blue);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-subtitle {
             color: var(--text-light);
         }
-    </style>
-}
 
-<div class="login-page">
-    <div class="login-background"></div>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <div class="login-logo">
-                    <div class="login-logo-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <h1 class="login-title">ঠিকানা</h1>
-                </div>
-                <p class="login-subtitle">ভাড়াটিয়া যাচাইকরণ সিস্টেম</p>
-            </div>
+        /* Login Tabs */
+        .login-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 1rem;
+        }
 
-            @if (ViewBag.Error != null)
-            {
-                <div class="alert alert-danger fade-in">
-                    <i class="fas fa-exclamation-circle"></i>
-                    @ViewBag.Error
-                </div>
+        .login-tab {
+            flex: 1;
+            padding: 0.75rem;
+            background: none;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+            .login-tab.active {
+                background: var(--police-blue);
+                color: var(--white);
             }
 
-            <form method="post" action="@Url.Action("Login", "Home")">
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-id-card"></i>
-                        জাতীয় পরিচয়পত্র নম্বর
-                    </label>
-                    <div class="input-wrapper with-icon">
-                        <i class="fas fa-id-card input-icon"></i>
-                        <input type="text"
-                               name="idNumber"
-                               class="form-control"
-                               placeholder="১০, ১৩, ১৪ বা ১৭ ডিজিটের নম্বর দিন"
-                               maxlength="17"
-                               required>
-                    </div>
-                </div>
+            .login-tab:hover:not(.active) {
+                background: #f1f5f9;
+            }
 
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-mobile-alt"></i>
-                        মোবাইল নম্বর
-                    </label>
-                    <div class="input-wrapper with-icon">
-                        <i class="fas fa-phone input-icon"></i>
-                        <input type="tel"
-                               name="mobileNumber"
-                               class="form-control"
-                               placeholder="০১XXXXXXXXX"
-                               pattern="01[3-9]\d{8}"
-                               required>
-                    </div>
-                </div>
+        /* Form Content */
+        .form-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
 
-                <div class="form-actions">
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="rememberMe">
-                        <label class="form-check-label" for="rememberMe">মনে রাখুন</label>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="fas fa-sign-in-alt"></i>
-                        লগইন করুন
-                    </button>
-                </div>
-            </form>
+            .form-content.active {
+                display: block;
+            }
 
-            <div class="form-footer">
-                <p>প্রথমবার ব্যবহার করছেন? <a href="#" class="text-primary">রেজিস্ট্রেশন করুন</a></p>
-                <a href="@Url.Action("Index", "Home")" class="btn btn-outline btn-sm">
-                    <i class="fas fa-arrow-left"></i>
-                    হোম পেজে ফিরে যান
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: var(--police-blue);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+            .form-label i {
+                color: var(--police-red);
+            }
+
+        .input-group {
+            position: relative;
+        }
+
+            .input-group i {
+                position: absolute;
+                left: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--text-light);
+                font-size: 1.1rem;
+            }
+
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-family: 'SolaimanLipi', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+            .form-control:focus {
+                outline: none;
+                border-color: var(--police-blue);
+                box-shadow: 0 0 0 3px rgba(13, 43, 108, 0.1);
+            }
+
+        /* Demo Box */
+        .demo-box {
+            background: rgba(13, 43, 108, 0.05);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border: 1px solid rgba(13, 43, 108, 0.1);
+        }
+
+        .demo-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--police-blue);
+            font-weight: 600;
+        }
+
+        .demo-credentials {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .demo-item {
+            background: var(--white);
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid #e2e8f0;
+        }
+
+        .demo-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .demo-value {
+            font-weight: 600;
+            color: var(--police-blue);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* Button */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1.75rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'SolaimanLipi', sans-serif;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--gradient-blue);
+            color: var(--white);
+            box-shadow: 0 10px 25px rgba(13, 43, 108, 0.3);
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 15px 35px rgba(13, 43, 108, 0.4);
+            }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--police-blue);
+            border: 2px solid var(--police-blue);
+        }
+
+            .btn-outline:hover {
+                background: var(--police-blue);
+                color: var(--white);
+            }
+
+        /* Alert */
+        .alert {
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--error-color);
+        }
+
+        /* Registration Link */
+        .registration-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+            .registration-link a {
+                color: var(--police-blue);
+                font-weight: 600;
+                text-decoration: none;
+            }
+
+        /* Footer */
+        .login-footer {
+            background: var(--dark-bg);
+            color: var(--white);
+            padding: 1rem 0;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        /* Animations */
+        @@keyframes fadeIn {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .login-container
+
+        {
+            grid-template-columns: 1fr;
+        }
+
+        .info-panel {
+            display: none;
+        }
+
+        .login-panel {
+            padding: 1.5rem;
+        }
+
+        .info-card {
+            padding: 1.5rem;
+        }
+
+        .header-container {
+            padding: 0 1rem;
+        }
+
+        }
+
+        @@media (max-height: 768px) {
+            .main-content
+
+        {
+            padding: 1rem;
+            min-height: calc(100vh - 100px);
+        }
+
+        .login-panel {
+            padding: 1.5rem;
+        }
+
+        .info-card {
+            padding: 1.5rem;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <!-- Compact Header -->
+    <header class="police-header">
+        <div class="header-container">
+            <a href="/" class="logo-container">
+                <div class="police-emblem">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-main">ঠিকানা যাচাইকরণ</span>
+                    <span class="logo-sub">বাংলাদেশ পুলিশ</span>
+                </div>
+            </a>
+
+            <div class="header-actions">
+                <a href="@Url.Action("Registration", "Home")" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                    <i class="fas fa-user-plus"></i>
+                    রেজিস্ট্রেশন
                 </a>
             </div>
+        </div>
+    </header>
 
-            <div class="login-features">
-                <div class="feature-item">
-                    <div class="feature-icon">
-                        <i class="fas fa-shield-alt"></i>
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="login-container">
+            <!-- Left Information Panel -->
+            <div class="info-panel">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-user-shield"></i>
                     </div>
-                    <div class="feature-text">১০০% নিরাপদ</div>
+                    <h2 class="info-title">ভাড়াটিয়া যাচাইকরণ সিস্টেম</h2>
+                    <p class="info-subtitle">
+                        বাংলাদেশ পুলিশের ডিজিটাল প্ল্যাটফর্মে আপনাকে স্বাগতম।
+                        নিরাপদ ও নির্ভুল ভাড়াটিয়া যাচাইকরণ সেবা।
+                    </p>
+
+                    <div class="info-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-shield-check"></i>
+                            </div>
+                            <div class="feature-text">
+                                <h4>১০০% নিরাপদ</h4>
+                                <p>সরকারি ডাটাবেজের সাথে সরাসরি সংযোগ</p>
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div class="feature-text">
+                                <h4>দ্রুত প্রক্রিয়াকরণ</h4>
+                                <p>মাত্র ৫ মিনিটে সম্পূর্ণ যাচাইকরণ</p>
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div class="feature-text">
+                                <h4>মোবাইল OTP</h4>
+                                <p>দ্বিস্তর নিরাপত্তা ব্যবস্থা</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="feature-item">
-                    <div class="feature-icon">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                    <div class="feature-text">দ্রুত প্রক্রিয়া</div>
+            </div>
+
+            <!-- Right Login Panel -->
+            <div class="login-panel">
+                <div class="form-header">
+                    <h2 class="form-title">অ্যাকাউন্টে প্রবেশ করুন</h2>
+                    <p class="form-subtitle">আপনার মোবাইল নম্বর ও পাসওয়ার্ড ব্যবহার করুন</p>
                 </div>
-                <div class="feature-item">
-                    <div class="feature-icon">
-                        <i class="fas fa-database"></i>
+
+                <!-- Login Tabs -->
+                <div class="login-tabs">
+                    <button class="login-tab active" onclick="showForm('existing')">
+                        <i class="fas fa-sign-in-alt"></i>
+                        লগইন
+                    </button>
+                    <button class="login-tab" onclick="showForm('new')">
+                        <i class="fas fa-user-plus"></i>
+                        নিবন্ধন করুন
+                    </button>
+                </div>
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        @ViewBag.Error
                     </div>
-                    <div class="feature-text">সরকারি ডাটাবেজ</div>
+                }
+
+                <!-- Existing User Login (Mobile + Password) -->
+                <div id="existingForm" class="form-content active">
+                    <form method="post" action="@Url.Action("UserLogin", "Home")">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-mobile-alt"></i>
+                                মোবাইল নম্বর
+                            </label>
+                            <div class="input-group">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel"
+                                       name="username"
+                                       class="form-control"
+                                       placeholder="০১XXXXXXXXX"
+                                       pattern="01[3-9]\d{8}"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-lock"></i>
+                                পাসওয়ার্ড
+                            </label>
+                            <div class="input-group">
+                                <i class="fas fa-key"></i>
+                                <input type="password"
+                                       name="password"
+                                       class="form-control"
+                                       placeholder="পাসওয়ার্ড দিন"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="demo-box">
+                            <div class="demo-header">
+                                <i class="fas fa-user-secret"></i>
+                                <span>ডেমো একাউন্ট</span>
+                            </div>
+                            <div class="demo-credentials">
+                                <div class="demo-item">
+                                    <div class="demo-label">মোবাইল নম্বর</div>
+                                    <div class="demo-value">01712345678</div>
+                                </div>
+                                <div class="demo-item">
+                                    <div class="demo-label">পাসওয়ার্ড</div>
+                                    <div class="demo-value">Test@123</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i>
+                            লগইন করুন
+                        </button>
+                    </form>
+                </div>
+
+                <!-- New User Registration (NID + Mobile) -->
+                <div id="newForm" class="form-content">
+                    <form method="post" action="@Url.Action("Login", "Home")">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-id-card"></i>
+                                জাতীয় পরিচয়পত্র নম্বর
+                            </label>
+                            <div class="input-group">
+                                <i class="fas fa-id-card"></i>
+                                <input type="text"
+                                       name="idNumber"
+                                       class="form-control"
+                                       placeholder="১০, ১৩, ১৪ বা ১৭ ডিজিটের নম্বর"
+                                       pattern="[0-9]{10}|[0-9]{13}|[0-9]{14}|[0-9]{17}"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-mobile-alt"></i>
+                                মোবাইল নম্বর
+                            </label>
+                            <div class="input-group">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel"
+                                       name="mobileNumber"
+                                       class="form-control"
+                                       placeholder="০১XXXXXXXXX"
+                                       pattern="01[3-9]\d{8}"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="demo-box">
+                            <div class="demo-header">
+                                <i class="fas fa-user-secret"></i>
+                                <span>ডেমো একাউন্ট</span>
+                            </div>
+                            <div class="demo-credentials">
+                                <div class="demo-item">
+                                    <div class="demo-label">NID নম্বর</div>
+                                    <div class="demo-value">1990123456789</div>
+                                </div>
+                                <div class="demo-item">
+                                    <div class="demo-label">মোবাইল নম্বর</div>
+                                    <div class="demo-value">01712345678</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-arrow-right"></i>
+                            পরবর্তী ধাপ
+                        </button>
+                    </form>
+                </div>
+
+                <div class="registration-link">
+                    <p>
+                        @if (ViewBag.Error == null)
+                        {
+                            <span id="registrationText">প্রথমবার ব্যবহার করছেন? <a href="#" onclick="showForm('new')">নিবন্ধন করুন</a></span>
+                            <span id="loginText" style="display: none;">ইতিমধ্যে একাউন্ট আছে? <a href="#" onclick="showForm('existing')">লগইন করুন</a></span>
+                        }
+                    </p>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </main>
 
-@section Scripts {
+    <!-- Footer -->
+    <footer class="login-footer">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 0 1.5rem;">
+            <p>&copy; <script>document.write(new Date().getFullYear());</script> ঠিকানা যাচাইকরণ সিস্টেম - বাংলাদেশ পুলিশ। সকল অধিকার সংরক্ষিত।</p>
+        </div>
+    </footer>
+
     <script>
-        // Form validation animation
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const inputs = this.querySelectorAll('input[required]');
-            let isValid = true;
+        // Form switching
+        function showForm(formType) {
+            // Hide all forms
+            document.querySelectorAll('.form-content').forEach(form => {
+                form.classList.remove('active');
+            });
 
-            inputs.forEach(input => {
-                if (!input.value.trim()) {
-                    isValid = false;
-                    input.parentElement.classList.add('shake');
-                    setTimeout(() => {
-                        input.parentElement.classList.remove('shake');
-                    }, 500);
+            // Remove active from all tabs
+            document.querySelectorAll('.login-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected form
+            document.getElementById(formType + 'Form').classList.add('active');
+
+            // Activate selected tab
+            document.querySelectorAll('.login-tab').forEach(tab => {
+                if (tab.textContent.includes(formType === 'existing' ? 'লগইন' : 'নিবন্ধন')) {
+                    tab.classList.add('active');
                 }
             });
 
-            if (!isValid) {
-                e.preventDefault();
+            // Update registration link
+            if (formType === 'existing') {
+                document.getElementById('registrationText').style.display = 'inline';
+                document.getElementById('loginText').style.display = 'none';
+            } else {
+                document.getElementById('registrationText').style.display = 'none';
+                document.getElementById('loginText').style.display = 'inline';
             }
-        });
+        }
 
-        // Add shake animation
-        const style = document.createElement('style');
-        style.textContent = `
-            .shake {
-                animation: shake 0.5s ease;
-            }
-        @@keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-10px); }
-                75% { transform: translateX(10px); }
-            }
-        `;
-        document.head.appendChild(style);
+        // Input auto-formatting
+        document.addEventListener('DOMContentLoaded', function() {
+            // Format mobile number inputs
+            document.querySelectorAll('input[type="tel"]').forEach(input => {
+                input.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length > 11) value = value.slice(0, 11);
+                    e.target.value = value;
+                });
+            });
+
+            // Format NID input
+            document.querySelector('input[name="idNumber"]')?.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 17) value = value.slice(0, 17);
+                e.target.value = value;
+            });
+        });
     </script>
-}
+</body>
+</html>

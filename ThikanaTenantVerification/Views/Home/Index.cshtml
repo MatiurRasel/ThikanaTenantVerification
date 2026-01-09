@@ -1,346 +1,1159 @@
-﻿@{
-    ViewData["Title"] = "ঠিকানা - ভাড়াটিয়া যাচাইকরণ";
-}
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]</title>
+    <title>@ViewData["Title"] - ঠিকানা ভাড়াটিয়া যাচাইকরণ</title>
     <link href="https://fonts.maateen.me/solaiman-lipi/font.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --police-blue: #0d2b6c; /* Official Bangladesh Police Blue */
+            --police-red: #e4002b; /* Police Red for alerts/importance */
+            --police-gold: #ffc107; /* Gold for highlights */
+            --police-light-blue: #1e88e5;
+            --dark-bg: #0a1a36;
+            --light-bg: #f0f4f8;
+            --white: #ffffff;
+            --text-light: #e8f0fe;
+            --gradient-blue: linear-gradient(135deg, #0d2b6c 0%, #1e3a8a 100%);
+            --gradient-dark: linear-gradient(135deg, #0a1a36 0%, #1a365d 100%);
+            --shadow-strong: 0 10px 40px rgba(0, 0, 0, 0.25);
+            --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'SolaimanLipi', Arial, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            font-family: 'SolaimanLipi', 'Inter', sans-serif;
+            background: var(--light-bg);
             color: #333;
+            overflow-x: hidden;
+            line-height: 1.6;
         }
 
-        .sticky-header {
-            position: sticky;
+        /* ===== STICKY HEADER ===== */
+        .police-sticky-header {
+            position: fixed;
             top: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            left: 0;
+            right: 0;
+            background: rgba(13, 43, 108, 0.98);
+            backdrop-filter: blur(15px);
             z-index: 1000;
-            transition: all 0.3s ease;
+            padding: 0.8rem 0;
+            border-bottom: 3px solid var(--police-red);
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
         }
 
-        .container {
-            max-width: 1200px;
+        .header-scrolled {
+            padding: 0.5rem 0;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+            background: rgba(13, 43, 108, 0.95);
+        }
+
+        .header-container {
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .navbar {
+            padding: 0 2rem;
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 0;
         }
 
-        .logo {
+        .logo-container {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #4a5568;
+            gap: 1rem;
             text-decoration: none;
         }
 
-        .logo-icon {
-            color: #667eea;
-            font-size: 2rem;
-        }
-
-        .nav-links {
+        .police-emblem {
+            width: 60px;
+            height: 60px;
+            background: var(--white);
+            border-radius: 50%;
             display: flex;
-            gap: 2rem;
             align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid var(--police-gold);
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
         }
 
-        .nav-link {
-            color: #4a5568;
-            text-decoration: none;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
+            .police-emblem:before {
+                content: '';
+                position: absolute;
+                width: 40px;
+                height: 40px;
+                background: var(--police-blue);
+                border-radius: 50%;
+                border: 2px solid var(--police-gold);
+            }
 
-        .nav-link:hover {
-            background: #667eea;
-            color: white;
-        }
+            .police-emblem i {
+                color: var(--police-gold);
+                font-size: 1.8rem;
+                position: relative;
+                z-index: 2;
+                text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            }
 
-        .hero {
-            padding: 6rem 0;
-            text-align: center;
-            color: white;
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1.5rem;
+        .logo-text {
+            color: var(--white);
             line-height: 1.2;
         }
 
-        .hero p {
-            font-size: 1.2rem;
-            max-width: 600px;
-            margin: 0 auto 2rem;
+        .logo-main {
+            font-size: 1.6rem;
+            font-weight: 800;
+            display: block;
+            letter-spacing: 0.5px;
+        }
+
+        .logo-sub {
+            font-size: 0.9rem;
             opacity: 0.9;
+            font-weight: 500;
         }
 
-        .cta-buttons {
+        /* Navigation */
+        .main-nav {
             display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 2rem;
-        }
-
-        .btn {
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.5rem;
         }
 
-        .btn-primary {
-            background: white;
-            color: #667eea;
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: white;
-            border: 2px solid white;
-        }
-
-        .btn-secondary:hover {
-            background: white;
-            color: #667eea;
-        }
-
-        .features {
-            padding: 5rem 0;
-            background: white;
-            border-radius: 30px 30px 0 0;
-            margin-top: -30px;
+        .nav-item {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             position: relative;
+            overflow: hidden;
         }
 
-        .features-grid {
+            .nav-item:before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+                transition: left 0.6s;
+            }
+
+            .nav-item:hover:before {
+                left: 100%;
+            }
+
+            .nav-item:hover {
+                background: rgba(255, 255, 255, 0.1);
+                color: var(--white);
+                transform: translateY(-2px);
+            }
+
+            .nav-item.active {
+                background: var(--police-red);
+                color: var(--white);
+                box-shadow: 0 4px 15px rgba(228, 0, 43, 0.4);
+            }
+
+            .nav-item.cta {
+                background: linear-gradient(135deg, var(--police-red), #ff3366);
+                color: var(--white);
+                padding: 0.8rem 1.8rem;
+                box-shadow: 0 4px 15px rgba(228, 0, 43, 0.3);
+                border: none;
+            }
+
+                .nav-item.cta:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 8px 25px rgba(228, 0, 43, 0.5);
+                    background: linear-gradient(135deg, #ff3366, var(--police-red));
+                }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            z-index: 1001;
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero-section {
+            padding-top: 140px;
+            padding-bottom: 100px;
+            background: var(--gradient-blue);
+            position: relative;
+            overflow: hidden;
+        }
+
+            .hero-section:before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: radial-gradient(circle at 20% 80%, rgba(255, 193, 7, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(30, 136, 229, 0.1) 0%, transparent 50%);
+            }
+
+        .hero-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-content {
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--white);
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            display: inline-block;
+        }
+
+            .hero-title:after {
+                content: '';
+                position: absolute;
+                bottom: -10px;
+                left: 0;
+                width: 80px;
+                height: 4px;
+                background: var(--police-gold);
+                border-radius: 2px;
+            }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+        }
+
+        .hero-visual {
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .dashboard-preview {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-strong);
+            transform: perspective(1000px) rotateY(-10deg);
+            transition: var(--transition);
+        }
+
+            .dashboard-preview:hover {
+                transform: perspective(1000px) rotateY(-5deg);
+            }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .preview-title {
+            color: var(--white);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .preview-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .preview-stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .stat-value {
+            color: var(--police-gold);
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.85rem;
+        }
+
+        /* ===== STATS SECTION ===== */
+        .stats-section {
+            padding: 5rem 0;
+            background: var(--white);
+        }
+
+        .stats-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .stats-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--police-blue);
+            margin-bottom: 1rem;
+            font-weight: 800;
+        }
+
+        .stats-subtitle {
+            text-align: center;
+            color: var(--police-blue);
+            opacity: 0.8;
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
             margin-top: 3rem;
         }
 
-        .feature-card {
-            background: #f8fafc;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            color: #667eea;
-            margin-bottom: 1rem;
-        }
-
-        .feature-card h3 {
-            color: #2d3748;
-            margin-bottom: 1rem;
-        }
-
-        .footer {
-            background: #2d3748;
-            color: white;
-            padding: 3rem 0;
+        .stat-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem 2rem;
             text-align: center;
+            box-shadow: var(--shadow-light);
+            border-top: 5px solid var(--police-blue);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
         }
 
-        .stats {
+            .stat-card:before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 5px;
+                background: linear-gradient(90deg, var(--police-blue), var(--police-light-blue));
+            }
+
+            .stat-card:hover {
+                transform: translateY(-15px);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            }
+
+        .stat-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--police-blue), var(--police-light-blue));
+            border-radius: 50%;
             display: flex;
-            justify-content: space-around;
-            padding: 2rem;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            margin: 2rem auto;
-            max-width: 800px;
-        }
-
-        .stat-item {
-            text-align: center;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+            color: var(--white);
+            box-shadow: 0 10px 20px rgba(13, 43, 108, 0.2);
         }
 
         .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: white;
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--police-blue);
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
         }
 
-        .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            overflow: hidden;
-            line-height: 0;
+        .stat-text {
+            color: #666;
+            font-size: 1.1rem;
+            font-weight: 500;
         }
 
-        .wave svg {
+        /* ===== FEATURES SECTION ===== */
+        .features-section {
+            padding: 6rem 0;
+            background: var(--gradient-dark);
             position: relative;
-            display: block;
-            width: calc(100% + 1.3px);
-            height: 150px;
+            overflow: hidden;
         }
 
-        .wave .shape-fill {
-            fill: #FFFFFF;
+        .features-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: 3rem;
+            color: var(--white);
+            margin-bottom: 1rem;
+            font-weight: 800;
+            position: relative;
+            display: inline-block;
+        }
+
+            .section-title:after {
+                content: '';
+                position: absolute;
+                bottom: -10px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100px;
+                height: 4px;
+                background: var(--police-gold);
+                border-radius: 2px;
+            }
+
+        .section-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-lg);
+            padding: 3rem 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+            .feature-card:hover {
+                transform: translateY(-10px);
+                background: rgba(255, 255, 255, 0.1);
+                border-color: var(--police-gold);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            }
+
+            .feature-card:before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 5px;
+                background: linear-gradient(90deg, var(--police-red), var(--police-gold));
+            }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--police-red), #ff3366);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            color: var(--white);
+            box-shadow: 0 10px 20px rgba(228, 0, 43, 0.3);
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            color: var(--white);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .feature-description {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.7;
+        }
+
+        /* ===== CTA SECTION ===== */
+        .cta-section {
+            padding: 8rem 0;
+            background: linear-gradient(135deg, rgba(13, 43, 108, 0.9), rgba(30, 58, 138, 0.9)), url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200');
+            background-size: cover;
+            background-attachment: fixed;
+            position: relative;
+        }
+
+        .cta-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--radius-lg);
+            padding: 4rem;
+            box-shadow: var(--shadow-strong);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            color: var(--police-blue);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+        }
+
+        .cta-description {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-group {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1.2rem 2.5rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--police-red), #ff3366);
+            color: var(--white);
+            box-shadow: 0 10px 30px rgba(228, 0, 43, 0.3);
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-5px) scale(1.05);
+                box-shadow: 0 15px 40px rgba(228, 0, 43, 0.5);
+                background: linear-gradient(135deg, #ff3366, var(--police-red));
+            }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--police-blue);
+            border: 3px solid var(--police-blue);
+        }
+
+            .btn-secondary:hover {
+                background: var(--police-blue);
+                color: var(--white);
+                transform: translateY(-5px);
+                box-shadow: 0 10px 30px rgba(13, 43, 108, 0.3);
+            }
+
+        .btn-lg {
+            padding: 1.5rem 3rem;
+            font-size: 1.2rem;
+        }
+
+        /* ===== FOOTER ===== */
+        .police-footer {
+            background: var(--dark-bg);
+            color: var(--white);
+            padding: 4rem 0 2rem;
+            position: relative;
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-section h3 {
+            color: var(--police-gold);
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .footer-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .footer-link:hover {
+                color: var(--police-gold);
+                transform: translateX(5px);
+            }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @@keyframes fadeInUp {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        @@keyframes float {
+            0%, 100%
+
+        {
+            transform: translateY(0) perspective(1000px) rotateY(-10deg);
+        }
+
+        50% {
+            transform: translateY(-20px) perspective(1000px) rotateY(-10deg);
+        }
+
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @@media (max-width: 1024px) {
+            .hero-grid
+
+        {
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+
+        .hero-visual {
+            order: -1;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+        }
+
         }
 
         @@media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
+            .header-container
+
+        {
+            padding: 0 1rem;
+        }
+
+        .main-nav {
+            display: none;
+            position: fixed;
+            top: 80px;
+            left: 0;
+            right: 0;
+            background: var(--police-blue);
+            flex-direction: column;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-top: 2px solid var(--police-red);
+        }
+
+            .main-nav.active {
+                display: flex;
             }
 
-            .cta-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
+        .mobile-menu-btn {
+            display: block;
+        }
 
-            .nav-links {
-                display: none;
-            }
+        .hero-title {
+            font-size: 2.2rem;
+        }
+
+        .btn-group {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
         }
     </style>
 </head>
 <body>
-    <header class="sticky-header">
-        <div class="container">
-            <nav class="navbar">
-                <a href="#" class="logo">
-                    <i class="fas fa-home logo-icon"></i>
-                    ঠিকানা
-                </a>
-                <div class="nav-links">
-                    <a href="#" class="nav-link">হোম</a>
-                    <a href="#" class="nav-link">কিভাবে কাজ করে</a>
-                    <a href="#" class="nav-link">যোগাযোগ</a>
-                    <!-- In your navigation menu -->
-                    <a href="@Url.Action("Registration", "Home")" class="nav-link">
-                        <i class="fas fa-user-plus"></i>
-                        রেজিস্ট্রেশন
-                    </a>
-                    <a href="@Url.Action("Login", "Home")" class="nav-link">লগইন</a>
+    <!-- ===== STICKY HEADER ===== -->
+    <header class="police-sticky-header" id="stickyHeader">
+        <div class="header-container">
+            <a href="/" class="logo-container">
+                <div class="police-emblem">
+                    <i class="fas fa-shield-alt"></i>
                 </div>
+                <div class="logo-text">
+                    <span class="logo-main">ঠিকানা যাচাইকরণ</span>
+                    <span class="logo-sub">বাংলাদেশ পুলিশ</span>
+                </div>
+            </a>
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <nav class="main-nav" id="mainNav">
+                <a href="/" class="nav-item active">
+                    <i class="fas fa-home"></i>
+                    হোম
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-info-circle"></i>
+                    তথ্য
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    প্রতিবেদন
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-question-circle"></i>
+                    সহায়তা
+                </a>
+                <a href="@Url.Action("Registration", "Home")" class="nav-item cta">
+                    <i class="fas fa-user-plus"></i>
+                    রেজিস্ট্রেশন
+                </a>
+                <a href="@Url.Action("Login", "Home")" class="nav-item">
+                    <i class="fas fa-sign-in-alt"></i>
+                    লগইন
+                </a>
             </nav>
         </div>
     </header>
 
-    <main>
-        <section class="hero">
-            <div class="container">
-                <h1>ভাড়াটিয়া যাচাইকরণ সিস্টেম</h1>
-                <p>জাতীয় পরিচয়পত্রের মাধ্যমে দ্রুত ও নিরাপদ ভাড়াটিয়া যাচাইকরণ। সরকারি ডাটাবেজের সাথে সরাসরি সংযুক্ত।</p>
+    <!-- ===== HERO SECTION ===== -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <h1 class="hero-title">ভাড়াটিয়া যাচাইকরণ সিস্টেম</h1>
+                    <p class="hero-subtitle">
+                        বাংলাদেশ পুলিশের ডিজিটাল প্ল্যাটফর্ম। জাতীয় পরিচয়পত্র ব্যবহার করে
+                        দ্রুততম সময়ে নিরাপদ ভাড়াটিয়া যাচাইকরণ। সরকারি ডাটাবেজের সাথে
+                        সরাসরি সংযোগের মাধ্যমে ১০০% নির্ভুল তথ্য।
+                    </p>
 
-                <div class="stats">
-                    <div class="stat-item">
-                        <div class="stat-number">১০০%</div>
-                        <div>নিরাপত্তা</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">৫ মিনিট</div>
-                        <div>যাচাই সময়</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">১০০০+</div>
-                        <div>যাচাইকৃত ব্যবহারকারী</div>
+                    <div class="btn-group">
+                        <a href="@Url.Action("Login", "Home")" class="btn btn-primary btn-lg">
+                            <i class="fas fa-play-circle"></i>
+                            এখনই শুরু করুন
+                        </a>
+                        <a href="#" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-video"></i>
+                            ডেমো দেখুন
+                        </a>
                     </div>
                 </div>
 
-                <div class="cta-buttons">
-                    <a href="@Url.Action("Login", "Home")" class="btn btn-primary">
-                        <i class="fas fa-user-check"></i>
-                        এখনই যাচাই করুন
-                    </a>
-                    <a href="#" class="btn btn-secondary">
-                        <i class="fas fa-info-circle"></i>
-                        বিস্তারিত জানুন
-                    </a>
+                <div class="hero-visual">
+                    <div class="dashboard-preview">
+                        <div class="preview-header">
+                            <div class="preview-title">লাইভ ড্যাশবোর্ড</div>
+                            <div style="color: var(--police-gold); font-size: 0.9rem;">
+                                <i class="fas fa-circle" style="color: #4ade80; margin-right: 5px;"></i>
+                                সক্রিয়
+                            </div>
+                        </div>
+
+                        <div class="preview-stats">
+                            <div class="preview-stat">
+                                <span class="stat-value">৫,২৪৭</span>
+                                <span class="stat-label">মোট যাচাই</span>
+                            </div>
+                            <div class="preview-stat">
+                                <span class="stat-value">৯৯.৮%</span>
+                                <span class="stat-label">সাফল্যের হার</span>
+                            </div>
+                            <div class="preview-stat">
+                                <span class="stat-value">৫মি</span>
+                                <span class="stat-label">গড় সময়</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="features">
-            <div class="container">
-                <h2 style="text-align: center; margin-bottom: 1rem; color: #2d3748;">আমাদের সুবিধাসমূহ</h2>
-                <p style="text-align: center; max-width: 600px; margin: 0 auto 3rem; color: #718096;">
-                    দ্রুত, সহজ এবং নিরাপদ যাচাইকরণ প্রক্রিয়া
+    <!-- ===== STATS SECTION ===== -->
+    <section class="stats-section">
+        <div class="stats-container">
+            <h2 class="stats-title">আমাদের সাফল্য</h2>
+            <p class="stats-subtitle">
+                বাংলাদেশ পুলিশের নির্ভরযোগ্যতা ও কার্যকারিতার সংখ্যায় প্রকাশ
+            </p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-number">১০,০০০+</div>
+                    <div class="stat-text">মোট ব্যবহারকারী</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="stat-number">১০০%</div>
+                    <div class="stat-text">নিরাপত্তা নিশ্চিত</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-number">৫ মিনিট</div>
+                    <div class="stat-text">যাচাই সময়</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="stat-number">২৪/৭</div>
+                    <div class="stat-text">ডাটাবেজ সংযোগ</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FEATURES SECTION ===== -->
+    <section class="features-section">
+        <div class="features-container">
+            <div class="section-header">
+                <h2 class="section-title">বিশেষ সুবিধাসমূহ</h2>
+                <p class="section-subtitle">
+                    উন্নত প্রযুক্তি ও বিশেষায়িত সেবার সমন্বয়
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3 class="feature-title">অতিদ্রুত প্রক্রিয়াকরণ</h3>
+                    <p class="feature-description">
+                        মাত্র ৫ মিনিটে সম্পূর্ণ ভাড়াটিয়া যাচাইকরণ।
+                        স্বয়ংক্রিয় সিস্টেমের মাধ্যমে তাৎক্ষণিক ফলাফল।
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-check"></i>
+                    </div>
+                    <h3 class="feature-title">সর্বোচ্চ নিরাপত্তা</h3>
+                    <p class="feature-description">
+                        এনক্রিপশন প্রযুক্তি ও দ্বিস্তর যাচাইকরণ।
+                        সরকারি ডাটাবেজের সাথে নিরাপদ সংযোগ।
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="feature-title">মোবাইল OTP সিস্টেম</h3>
+                    <p class="feature-description">
+                        মোবাইল নম্বরে OTP পাঠিয়ে দ্বিস্তর নিরাপত্তা।
+                        প্রতিটি লেনদেনে অতিরিক্ত সুরক্ষা স্তর।
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <h3 class="feature-title">ডিজিটাল প্রতিবেদন</h3>
+                    <p class="feature-description">
+                        স্বয়ংক্রিয়ভাবে পিডিএফ প্রতিবেদন তৈরি।
+                        অনলাইনে সংরক্ষণ ও মুদ্রণের সুবিধা।
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <h3 class="feature-title">সম্পূর্ণ ইতিহাস</h3>
+                    <p class="feature-description">
+                        সকল যাচাইকরণের সম্পূর্ণ ডিজিটাল রেকর্ড।
+                        তারিখ ও সময় অনুসারে অনুসন্ধানের সুবিধা।
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3 class="feature-title">২৪/৭ সহায়তা</h3>
+                    <p class="feature-description">
+                        বিশেষজ্ঞ টিমের সার্বক্ষণিক সহায়তা।
+                        ফোন, ইমেইল ও লাইভ চ্যাট সাপোর্ট।
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA SECTION ===== -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <div class="cta-content">
+                <h2 class="cta-title">এখনই শুরু করুন</h2>
+                <p class="cta-description">
+                    বাংলাদেশ পুলিশের আধুনিক প্ল্যাটফর্মে যোগ দিন।
+                    দ্রুততম সময়ে ভাড়াটিয়া যাচাইকরণের সম্পূর্ণ ডিজিটাল সমাধান।
                 </p>
 
-                <div class="features-grid">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <h3>১০০% নিরাপদ</h3>
-                        <p>সরকারি ডাটাবেজের সাথে সরাসরি সংযোগের মাধ্যমে সম্পূর্ণ নিরাপদ যাচাইকরণ</p>
-                    </div>
+                <div class="btn-group">
+                    <a href="@Url.Action("Registration", "Home")" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus"></i>
+                        বিনামূল্যে রেজিস্ট্রেশন
+                    </a>
+                    <a href="@Url.Action("Login", "Home")" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-sign-in-alt"></i>
+                        একাউন্টে লগইন
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                        <h3>দ্রুত প্রক্রিয়া</h3>
-                        <p>মাত্র ৫ মিনিটে সম্পূর্ণ ভাড়াটিয়া যাচাইকরণ সম্পন্ন করুন</p>
+    <!-- ===== FOOTER ===== -->
+    <footer class="police-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>ঠিকানা যাচাইকরণ</h3>
+                    <p style="color: rgba(255,255,255,0.8); margin-bottom: 1.5rem;">
+                        বাংলাদেশ পুলিশের ডিজিটাল প্ল্যাটফর্ম।
+                        নিরাপদ ও নির্ভুল ভাড়াটিয়া যাচাইকরণ সেবা।
+                    </p>
+                    <div class="footer-links">
+                        <a href="#" class="footer-link">
+                            <i class="fas fa-map-marker-alt"></i>
+                            পুলিশ সদর দপ্তর, ঢাকা
+                        </a>
                     </div>
+                </div>
 
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-mobile-alt"></i>
-                        </div>
-                        <h3>মোবাইল OTP</h3>
-                        <p>মোবাইল নম্বরে OTP পাঠিয়ে দ্বিস্তর নিরাপত্তা নিশ্চিত করুন</p>
+                <div class="footer-section">
+                    <h3>দ্রুত লিংক</h3>
+                    <div class="footer-links">
+                        <a href="#" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>
+                            ব্যবহারকারী গাইড
+                        </a>
+                        <a href="#" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>
+                            প্রাইভেসি পলিসি
+                        </a>
+                        <a href="#" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>
+                            শর্তাবলী
+                        </a>
+                        <a href="#" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>
+                            এফএকিউ
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>যোগাযোগ</h3>
+                    <div class="footer-links">
+                        <a href="tel:+8809666777888" class="footer-link">
+                            <i class="fas fa-phone"></i>
+                            +৮৮০ ৯৬৬৬-৭৭৭৮৮৮
+                        </a>
+                        <a href="mailto:support@police.gov.bd" class="footer-link">
+                            <i class="fas fa-envelope"></i>
+                            support@police.gov.bd
+                        </a>
+                        <a href="#" class="footer-link">
+                            <i class="fab fa-facebook"></i>
+                            Facebook পেইজ
+                        </a>
                     </div>
                 </div>
             </div>
-        </section>
-    </main>
 
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; ২০২৪ ঠিকানা - ভাড়াটিয়া যাচাইকরণ সিস্টেম</p>
-            <p style="margin-top: 1rem; opacity: 0.8;">সকল অধিকার সংরক্ষিত</p>
+            <div class="footer-bottom">
+                <p>&copy; <script>document.write(new Date().getFullYear());</script> ঠিকানা যাচাইকরণ সিস্টেম - বাংলাদেশ পুলিশ। সকল অধিকার সংরক্ষিত।</p>
+                <p style="margin-top: 0.5rem; font-size: 0.85rem;">সংস্করণ: ৩.২.১ | সর্বশেষ হালনাগাদ: আজ</p>
+            </div>
         </div>
     </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            const nav = document.getElementById('mainNav');
+            nav.classList.toggle('active');
+            this.innerHTML = nav.classList.contains('active') ?
+                '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+        });
+
+        // Sticky Header Effect
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('stickyHeader');
+            if (window.scrollY > 100) {
+                header.classList.add('header-scrolled');
+            } else {
+                header.classList.remove('header-scrolled');
+            }
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if(targetId === '#') return;
+
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements for animation
+        document.querySelectorAll('.feature-card, .stat-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
 </body>
 </html>
