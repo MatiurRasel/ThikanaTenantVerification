@@ -5,10 +5,6 @@ GO
 USE ThikanaTenantDB;
 GO
 
--- Enable Case Insensitive Collation for Bengali Support
-ALTER DATABASE ThikanaTenantDB COLLATE Bangla_100_CI_AS;
-GO
-
 -- Users Table (Updated)
 CREATE TABLE Users (
     Id INT PRIMARY KEY IDENTITY(1,1),
@@ -36,7 +32,7 @@ CREATE TABLE Users (
     IsActive BIT DEFAULT 1,
     CreatedAt DATETIME DEFAULT GETDATE(),
     UpdatedAt DATETIME DEFAULT GETDATE(),
-    
+    PasswordHash NVARCHAR(255) NULL
     INDEX IX_Users_MobileNumber (MobileNumber),
     INDEX IX_Users_VerificationStatus (VerificationStatus),
     INDEX IX_Users_CreatedAt (CreatedAt DESC),
@@ -396,7 +392,7 @@ LEFT JOIN CurrentResidence cr ON u.Id = cr.UserId
 LEFT JOIN CurrentLandlord cl ON u.Id = cl.UserId
 WHERE u.IsActive = 1;
 GO
-
+--SELECT * FROM TenantVerificationSummary
 -- View for Landlord Dashboard
 CREATE VIEW LandlordDashboard AS
 SELECT 
@@ -414,6 +410,7 @@ LEFT JOIN Notifications n ON l.Id = n.LandlordId AND n.IsRead = 0
 WHERE l.IsActive = 1
 GROUP BY l.Id, l.NameBN, l.MobileNumber;
 GO
+--SELECT * FROM LandlordDashboard
 
 -- View for Admin Dashboard
 CREATE VIEW AdminDashboard AS
@@ -440,6 +437,7 @@ LEFT JOIN PoliceVerificationRequests pvr ON u.Id = pvr.UserId
 WHERE a.IsActive = 1
 GROUP BY a.Id, a.Name, a.AccessLevel, a.Division, a.District, a.Thana;
 GO
+--SELECT * FROM AdminDashboard
 
 -- Create Stored Procedures
 
@@ -727,9 +725,9 @@ INSERT INTO SystemSettings (SettingKey, SettingValue, Description, Category) VAL
 ('MaxLoginAttempts', '3', 'Maximum login attempts before lockout', 'Security'),
 ('LockoutMinutes', '15', 'Account lockout duration in minutes', 'Security'),
 ('VerificationThreshold', '90', 'Minimum completion percentage for verification', 'Verification'),
-('DefaultThana', 'ধানমন্ডি', 'Default thana for new registrations', 'Location'),
-('DefaultDistrict', 'ঢাকা', 'Default district for new registrations', 'Location'),
-('DefaultDivision', 'ঢাকা', 'Default division for new registrations', 'Location'),
+('DefaultThana', N'ধানমন্ডি', 'Default thana for new registrations', 'Location'),
+('DefaultDistrict', N'ঢাকা', 'Default district for new registrations', 'Location'),
+('DefaultDivision', N'ঢাকা', 'Default division for new registrations', 'Location'),
 ('SMSProvider', 'Demo', 'SMS provider name', 'Communication'),
 ('EmailProvider', 'SMTP', 'Email provider name', 'Communication'),
 ('MaxDocumentSizeMB', '5', 'Maximum document upload size in MB', 'Document'),
@@ -741,22 +739,22 @@ INSERT INTO SystemSettings (SettingKey, SettingValue, Description, Category) VAL
 
 -- Insert Default Message Templates
 INSERT INTO MessageTemplates (TemplateName, TemplateType, SubjectBN, BodyBN, Variables) VALUES
-('OTPVerification', 'SMS', NULL, 'আপনার OTP কোড: {otp}. এটি {minutes} মিনিটের জন্য বৈধ।', '{otp},{minutes}'),
-('RegistrationSuccess', 'SMS', NULL, 'স্বাগতম {name}! আপনার রেজিস্ট্রেশন সফলভাবে সম্পন্ন হয়েছে।', '{name}'),
-('VerificationPending', 'Notification', 'যাচাইকরণ পেন্ডিং', 'ভাড়াটিয়া {tenantName} এর যাচাইকরণ অনুরোধ পেন্ডিং রয়েছে।', '{tenantName}'),
-('VerificationCompleted', 'Email', 'যাচাইকরণ সম্পন্ন', 'প্রিয় {landlordName}, ভাড়াটিয়া {tenantName} এর যাচাইকরণ সম্পন্ন হয়েছে।', '{landlordName},{tenantName}'),
-('PoliceVerificationAlert', 'Notification', 'পুলিশ যাচাইকরণ প্রয়োজন', 'গৃহকর্মী {workerName} এর পুলিশ যাচাইকরণ প্রয়োজন।', '{workerName}'),
-('DocumentUploadReminder', 'Notification', 'ডকুমেন্ট আপলোড করুন', 'আপনার {documentType} আপলোড করুন যাচাইকরণ সম্পন্ন করতে।', '{documentType}');
+('OTPVerification', 'SMS', NULL, N'আপনার OTP কোড: {otp}. এটি {minutes} মিনিটের জন্য বৈধ।', '{otp},{minutes}'),
+('RegistrationSuccess', 'SMS', NULL, N'স্বাগতম {name}! আপনার রেজিস্ট্রেশন সফলভাবে সম্পন্ন হয়েছে।', '{name}'),
+('VerificationPending', 'Notification', N'যাচাইকরণ পেন্ডিং', 'ভাড়াটিয়া {tenantName} এর যাচাইকরণ অনুরোধ পেন্ডিং রয়েছে।', '{tenantName}'),
+('VerificationCompleted', 'Email', N'যাচাইকরণ সম্পন্ন', 'প্রিয় {landlordName}, ভাড়াটিয়া {tenantName} এর যাচাইকরণ সম্পন্ন হয়েছে।', '{landlordName},{tenantName}'),
+('PoliceVerificationAlert', 'Notification', N'পুলিশ যাচাইকরণ প্রয়োজন', 'গৃহকর্মী {workerName} এর পুলিশ যাচাইকরণ প্রয়োজন।', '{workerName}'),
+('DocumentUploadReminder', 'Notification', N'ডকুমেন্ট আপলোড করুন', 'আপনার {documentType} আপলোড করুন যাচাইকরণ সম্পন্ন করতে।', '{documentType}');
 
 -- Insert Default Super Admin (Password: Admin@123)
 INSERT INTO SystemAdmins (Name, Email, PasswordHash, Designation, MobileNumber, AccessLevel) 
-VALUES ('সুপার এডমিন', 'admin@thikana.gov.bd', 
+VALUES (N'সুপার এডমিন', 'admin@thikana.gov.bd', 
         '$2a$11$YOUR_HASHED_PASSWORD_HERE', -- Use BCrypt to hash 'Admin@123'
-        'সুপার এডমিনিস্ট্রেটর', '01700000000', 'Super');
+        N'সুপার এডমিনিস্ট্রেটর', '01700000000', 'Super');
 
 -- Insert Sample Landlord
 INSERT INTO Landlords (NameBN, MobileNumber, Email, Address) 
-VALUES ('মোঃ রফিকুল ইসলাম', '01712345678', 'rafiq@example.com', '১২৩, গুলশান, ঢাকা');
+VALUES (N'মোঃ রফিকুল ইসলাম', '01712345678', 'rafiq@example.com', '১২৩, গুলশান, ঢাকা');
 
 -- Insert Sample User for Testing
 INSERT INTO Users (
@@ -764,8 +762,8 @@ INSERT INTO Users (
     MaritalStatus, Religion, MobileNumber, PermanentAddress,
     VerificationStatus, CompletionPercentage
 ) VALUES (
-    '1991234567890', 'আহমেদ হাসান', 'মোঃ আব্দুল করিম', '1990-05-15', 'পুরুষ',
-    'বিবাহিত', 'ইসলাম', '01712345678', '১২৩, ধানমন্ডি, ঢাকা',
+    '1991234567890', N'আহমেদ হাসান', N'মোঃ আব্দুল করিম', '1990-05-15', N'পুরুষ',
+    N'বিবাহিত', N'ইসলাম', '01712345678', N'১২৩, ধানমন্ডি, ঢাকা',
     'Pending', 30
 );
 
@@ -877,48 +875,3 @@ GO
 
 
 
--- Check if column exists, if not add it
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
-               WHERE TABLE_NAME = 'Users' AND COLUMN_NAME = 'PasswordHash')
-BEGIN
-    ALTER TABLE Users
-    ADD PasswordHash NVARCHAR(255) NULL;
-    
-    -- Update existing users with default password hash
-    UPDATE Users 
-    SET PasswordHash = '$2a$11$YOUR_HASHED_PASSWORD_HERE' -- Hash for 'Default@123'
-    WHERE PasswordHash IS NULL;
-END
-GO
-
-
--- Add missing columns to Users table
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
-               WHERE TABLE_NAME = 'Users' AND COLUMN_NAME = 'FatherNameEN')
-BEGIN
-    ALTER TABLE Users
-    ADD FatherNameEN NVARCHAR(200) NULL;
-END
-GO
-
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
-               WHERE TABLE_NAME = 'Users' AND COLUMN_NAME = 'MotherNameEN')
-BEGIN
-    ALTER TABLE Users
-    ADD MotherNameEN NVARCHAR(200) NULL;
-END
-GO
-
--- Also ensure PasswordHash column exists
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
-               WHERE TABLE_NAME = 'Users' AND COLUMN_NAME = 'PasswordHash')
-BEGIN
-    ALTER TABLE Users
-    ADD PasswordHash NVARCHAR(255) NULL;
-    
-    -- Update existing users with default password hash
-    UPDATE Users 
-    SET PasswordHash = '$2a$11$YOUR_HASHED_PASSWORD_HERE' -- Hash for 'Default@123'
-    WHERE PasswordHash IS NULL;
-END
-GO

@@ -1,314 +1,446 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ThikanaTenantVerification.Models;
 using ThikanaTenantVerification.Services;
 
 namespace ThikanaTenantVerification.Controllers
 {
+    /// <summary>
+    /// Home controller for tenant verification application
+    /// Handles landing page, registration, login, and dashboard
+    /// </summary>
     public class HomeController : Controller
     {
         private readonly IDataService _dataService;
+        private readonly IOtpService _otpService;
+        private readonly IApiMockService _apiMockService;
+        private readonly IJwtService _jwtService;
+        private readonly ILoggingService _loggingService;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(IDataService dataService, ILogger<HomeController> logger)
+        /// <summary>
+        /// Initializes a new instance of HomeController
+        /// </summary>
+        public HomeController(
+            IDataService dataService,
+            IOtpService otpService,
+            IApiMockService apiMockService,
+            IJwtService jwtService,
+            ILoggingService loggingService,
+            ILogger<HomeController> logger)
         {
             _dataService = dataService;
+            _otpService = otpService;
+            _apiMockService = apiMockService;
+            _jwtService = jwtService;
+            _loggingService = loggingService;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Landing page - Eye-catching with Police gradient and sticky header
+        /// </summary>
+        /// <returns>Landing page view</returns>
         public IActionResult Index()
         {
             return View();
         }
 
+        /// <summary>
+        /// User login page - OTP-based authentication
+        /// </summary>
+        /// <returns>Login view</returns>
         [HttpGet]
         public IActionResult Login()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Login(string idNumber, string mobileNumber)
-        {
-            try
-            {
-                // Validate ID number length
-                if (string.IsNullOrEmpty(idNumber) || (idNumber.Length != 10 && idNumber.Length != 13 &&
-                    idNumber.Length != 17 && idNumber.Length != 14))
-                {
-                    ViewBag.Error = "অনুগ্রহ করে সঠিক জাতীয় পরিচয়পত্র বা জন্ম নিবন্ধন নম্বর দিন (১০/১৩/১৪/১৭ ডিজিট)";
-                    return View();
-                }
-
-                // Check if user exists in database (registered user)
-                var existingUser = await _dataService.GetUserByNIDAndMobile(idNumber, mobileNumber);
-
-                if (existingUser != null)
-                {
-                    // This is an existing registered user
-                    TempData["MobileNumber"] = mobileNumber;
-                    TempData["UserId"] = existingUser.Id.ToString();
-                    TempData["IsNewUser"] = false; // Existing user
-
-                    return RedirectToAction("VerifyOTP");
-                }
-
-                // Check if this is a new user (NID exists but not registered)
-                var nidData = await _dataService.GetNIDDataAsync(idNumber);
-                if (nidData == null)
-                {
-                    ViewBag.Error = "জাতীয় পরিচয়পত্র/জন্ম নিবন্ধন নম্বর পাওয়া যায়নি";
-                    return View();
-                }
-
-                if (nidData.MobileNumber != mobileNumber)
-                {
-                    ViewBag.Error = "মোবাইল নম্বর মিলছে না";
-                    return View();
-                }
-
-                // This is a new user - store NID data for registration
-                TempData["NIDData"] = JsonSerializer.Serialize(nidData);
-                TempData["MobileNumber"] = mobileNumber;
-                TempData["IsNewUser"] = true; // New user needs password setup
-
-                return RedirectToAction("VerifyOTP");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Login error");
-                ViewBag.Error = "একটি ত্রুটি হয়েছে। পরে চেষ্টা করুন";
-                return View();
-            }
-        }
-
-        // Add this method for password strength validation
-        private bool IsPasswordStrong(string password)
-        {
-            // Check for at least 8 characters
-            if (password.Length < 8) return false;
-
-            // Check for at least one uppercase letter
-            if (!password.Any(char.IsUpper)) return false;
-
-            // Check for at least one lowercase letter
-            if (!password.Any(char.IsLower)) return false;
-
-            // Check for at least one digit
-            if (!password.Any(char.IsDigit)) return false;
-
-            // Check for at least one special character
-            var specialCharacters = "!@#$%^&*";
-            if (!password.Any(c => specialCharacters.Contains(c))) return false;
-
-            return true;
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UserLogin(string username, string password)
-        {
-            try
-            {
-                // Check if username is NID or mobile
-                var user = await _dataService.AuthenticateUser(username, password);
-
-                if (user == null)
-                {
-                    ViewBag.Error = "ভুল NID/মোবাইল নম্বর বা পাসওয়ার্ড";
-                    return View("UserLogin");
-                }
-
-                // Set session
-                HttpContext.Session.SetInt32("UserId", user.Id);
-                HttpContext.Session.SetString("UserName", user.FullNameBN);
-                HttpContext.Session.SetString("UserNID", user.NIDNumber ?? "");
-
-                // Record login
-                await _dataService.RecordLogin(user.Id, HttpContext.Connection.RemoteIpAddress?.ToString());
-
-                return RedirectToAction("Dashboard", new { id = user.Id });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "User login error");
-                ViewBag.Error = "লগইনে সমস্যা হয়েছে। পরে চেষ্টা করুন";
-                return View("UserLogin");
-            }
-        }
-
-        [HttpGet]
-        public IActionResult UserLogin()
         {
             // If already logged in, redirect to dashboard
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId.HasValue)
             {
-                return RedirectToAction("Dashboard", new { id = userId.Value });
+                return RedirectToAction("Dashboard");
             }
 
             return View();
         }
 
+        /// <summary>
+        /// Handles OTP-based login request
+        /// User provides mobile number, receives OTP, then verifies
+        /// </summary>
+        /// <param name="mobileNumber">Mobile number for login</param>
+        /// <returns>JSON response with OTP sent status</returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RequestLoginOtp(string mobileNumber)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(mobileNumber) || !System.Text.RegularExpressions.Regex.IsMatch(mobileNumber, @"^01[3-9]\d{8}$"))
+                {
+                    return Json(new { success = false, message = "অনুগ্রহ করে সঠিক মোবাইল নম্বর দিন" });
+                }
+
+                // Check if user exists
+                var user = await _dataService.GetUserByIdNumber(mobileNumber);
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "এই মোবাইল নম্বর দিয়ে কোন অ্যাকাউন্ট নেই। রেজিস্ট্রেশন করুন।" });
+                }
+
+                // Generate and send OTP
+                var otp = await _otpService.GenerateAndSaveOtpAsync(mobileNumber);
+                
+                await _loggingService.LogAuthenticationEventAsync(
+                    "LOGIN_OTP_REQUESTED", 
+                    user.Id, 
+                    mobileNumber, 
+                    HttpContext.Connection.RemoteIpAddress?.ToString(), 
+                    true, 
+                    "OTP requested for login"
+                );
+
+                // For demo, return OTP in response (REMOVE IN PRODUCTION)
+                return Json(new 
+                { 
+                    success = true, 
+                    message = $"OTP পাঠানো হয়েছে {mobileNumber} নম্বরে। (ডেমো: OTP = {otp})",
+                    mobileNumber = mobileNumber,
+                    demoOtp = otp // REMOVE THIS IN PRODUCTION
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error requesting login OTP");
+                await _loggingService.LogErrorAsync("Error requesting login OTP", ex);
+                return Json(new { success = false, message = "একটি ত্রুটি হয়েছে। পরে চেষ্টা করুন" });
+            }
+        }
+
+        /// <summary>
+        /// Verifies OTP and logs user in (OTP-based authentication - no password required)
+        /// </summary>
+        /// <param name="mobileNumber">Mobile number</param>
+        /// <param name="otpCode">OTP code to verify</param>
+        /// <returns>JSON response with login status</returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyLoginOtp(string mobileNumber, string otpCode)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(mobileNumber) || string.IsNullOrEmpty(otpCode))
+                {
+                    return Json(new { success = false, message = "মোবাইল নম্বর এবং OTP দিন" });
+                }
+
+                // Verify OTP
+                var isValidOtp = await _otpService.VerifyOtpAsync(mobileNumber, otpCode);
+                if (!isValidOtp)
+                {
+                    await _loggingService.LogAuthenticationEventAsync(
+                        "LOGIN_OTP_VERIFY_FAILED",
+                        null,
+                        mobileNumber,
+                        HttpContext.Connection.RemoteIpAddress?.ToString(),
+                        false,
+                        "Invalid OTP"
+                    );
+
+                    return Json(new { success = false, message = "ভুল OTP কোড। আবার চেষ্টা করুন।" });
+                }
+
+                // Get user
+                var user = await _dataService.GetUserByIdNumber(mobileNumber);
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "ব্যবহারকারী পাওয়া যায়নি" });
+                }
+
+                // Generate JWT token
+                var token = _jwtService.GenerateToken(user.Id, user.MobileNumber, "Tenant");
+
+                // Set session
+                HttpContext.Session.SetInt32("UserId", user.Id);
+                HttpContext.Session.SetString("UserName", user.FullNameBN);
+                HttpContext.Session.SetString("UserNID", user.NIDNumber ?? "");
+                HttpContext.Session.SetString("JWTToken", token);
+
+                // Record login
+                await _dataService.RecordLogin(user.Id, HttpContext.Connection.RemoteIpAddress?.ToString());
+
+                await _loggingService.LogAuthenticationEventAsync(
+                    "LOGIN_SUCCESS",
+                    user.Id,
+                    mobileNumber,
+                    HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    true,
+                    "OTP-based login successful"
+                );
+
+                return Json(new 
+                { 
+                    success = true, 
+                    message = "লগইন সফল!",
+                    redirectUrl = Url.Action("Dashboard"/*, new { id = user.Id }*/)
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error verifying login OTP");
+                await _loggingService.LogErrorAsync("Error verifying login OTP", ex);
+                return Json(new { success = false, message = "একটি ত্রুটি হয়েছে। পরে চেষ্টা করুন" });
+            }
+        }
+
+        /// <summary>
+        /// Handles user registration request
+        /// Validates NID/Birth Certificate and mobile number, sends OTP
+        /// NO PASSWORD REQUIRED - OTP acts as authentication
+        /// </summary>
+        /// <param name="idNumber">NID or Birth Certificate number (13/14/15/17 digits)</param>
+        /// <param name="mobileNumber">Mobile number (must match NID record)</param>
+        /// <returns>JSON response with registration status</returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(string idNumber, string mobileNumber)
+        {
+            try
+            {
+                _logger.LogInformation("Register called with NID: {NID}, Mobile: {Mobile}", idNumber, mobileNumber);
+
+                // Validate ID number length (10, 13, 14, 15, or 17 digits)
+                if (string.IsNullOrEmpty(idNumber) || !(new[] { 10, 13, 14, 15, 17 }.Contains(idNumber.Length)))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "অনুগ্রহ করে সঠিক জাতীয় পরিচয়পত্র বা জন্ম নিবন্ধন নম্বর দিন (১০/১৩/১৪/১৫/১৭ ডিজিট)"
+                    });
+                }
+
+                // Validate mobile number
+                if (string.IsNullOrEmpty(mobileNumber) || !System.Text.RegularExpressions.Regex.IsMatch(mobileNumber, @"^01[3-9]\d{8}$"))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "অনুগ্রহ করে সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)"
+                    });
+                }
+
+                // Check if user already exists
+                var existingUser = await _dataService.GetUserByNIDAndMobile(idNumber, mobileNumber);
+                if (existingUser != null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "এই NID এবং মোবাইল নম্বর দিয়ে ইতিমধ্যে রেজিস্ট্রেশন করা হয়েছে। লগইন করুন।",
+                        redirectToLogin = true
+                    });
+                }
+
+                // Get NID data from government API (mock service)
+                var nidData = await _apiMockService.GetNIDDataAsync(idNumber);
+                if (nidData == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "NID তথ্য পাওয়া যায়নি। অনুগ্রহ করে সঠিক NID নম্বর দিন।"
+                    });
+                }
+
+                // Validate mobile number matches NID record
+                var mobileMatches = await _apiMockService.ValidateMobileWithNIDAsync(mobileNumber, idNumber);
+                if (!mobileMatches && nidData.MobileNumber != mobileNumber)
+                {
+                    // For demo, we'll allow it but log a warning
+                    _logger.LogWarning("Mobile number {Mobile} does not match NID {NID} record, but allowing for demo", mobileNumber, idNumber);
+                    // In production, return error:
+                    // return Json(new { success = false, message = "এই মোবাইল নম্বর এই NID এর সাথে মিলছে না।" });
+                }
+
+                // Update mobile number in NID data if different (for demo flexibility)
+                nidData.MobileNumber = mobileNumber;
+
+                // Generate and send OTP
+                var otp = await _otpService.GenerateAndSaveOtpAsync(mobileNumber);
+
+                // Store registration data in TempData for OTP verification step
+                TempData["NIDData"] = JsonSerializer.Serialize(nidData);
+                TempData["MobileNumber"] = mobileNumber;
+                TempData["IdNumber"] = idNumber;
+                TempData["RegistrationStep"] = "otp_verification";
+
+                await _loggingService.LogInformationAsync(
+                    $"Registration OTP sent to {mobileNumber} for NID {idNumber}",
+                    null,
+                    new Dictionary<string, object> { { "NID", idNumber }, { "Mobile", mobileNumber } }
+                );
+
+                // For demo, return OTP in response (REMOVE IN PRODUCTION)
+                return Json(new
+                {
+                    success = true,
+                    message = $"NID যাচাই সফল! OTP পাঠানো হয়েছে {mobileNumber} নম্বরে।",
+                    mobileNumber = mobileNumber,
+                    demoOtp = otp, // REMOVE THIS IN PRODUCTION
+                    redirectUrl = Url.Action("VerifyOTP")
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Registration error");
+                await _loggingService.LogErrorAsync("Registration error", ex);
+                return Json(new { success = false, message = "একটি ত্রুটি হয়েছে। পরে চেষ্টা করুন" });
+            }
+        }
+
+        /// <summary>
+        /// OTP verification page for registration
+        /// </summary>
+        /// <returns>OTP verification view</returns>
         [HttpGet]
         public IActionResult VerifyOTP()
         {
-            if (TempData["MobileNumber"] == null)
+            if (TempData["MobileNumber"] == null || TempData["RegistrationStep"]?.ToString() != "otp_verification")
+            {
                 return RedirectToAction("Login");
+            }
 
             ViewBag.MobileNumber = TempData["MobileNumber"];
-            ViewBag.IsNewUser = TempData["IsNewUser"] != null;
-            ViewBag.UserId = TempData["UserId"]?.ToString();
+            ViewBag.NIDData = TempData["NIDData"]?.ToString();
+            ViewBag.RegistrationStep = "otp_verification";
 
             TempData.Keep("MobileNumber");
             TempData.Keep("NIDData");
-            TempData.Keep("UserId");
-            TempData.Keep("IsNewUser");
+            TempData.Keep("IdNumber");
+            TempData.Keep("RegistrationStep");
 
             return View();
         }
 
+        /// <summary>
+        /// Verifies OTP and completes registration
+        /// Creates user account WITHOUT password - OTP is used for authentication
+        /// User can optionally set password later
+        /// </summary>
+        /// <param name="otp">OTP code to verify</param>
+        /// <returns>Redirects to dashboard on success</returns>
         [HttpPost]
-        public async Task<IActionResult> VerifyOTP(string otp, string password, string confirmPassword,
-     bool isNewUser = false, int? userId = null)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyOTP(string otp)
         {
-            // Default OTP value for bypassing verification
-            const string DEFAULT_OTP = "123456";
-
-            var mobileNumber = TempData["MobileNumber"]?.ToString();
-            var nidDataJson = TempData["NIDData"]?.ToString();
-            var storedUserId = TempData["UserId"]?.ToString();
-
-            if (string.IsNullOrEmpty(mobileNumber))
-                return RedirectToAction("Login", "Home");
-
-            // Accept either the default OTP or any 6-digit OTP for testing
-            bool isValidOtp = otp == DEFAULT_OTP || (otp?.Length == 6 && otp.All(char.IsDigit));
-
-            if (!isValidOtp)
+            try
             {
-                ViewBag.Error = "ভুল OTP। ডিফল্ট OTP: 123456";
-                ViewBag.MobileNumber = mobileNumber;
-                ViewBag.IsNewUser = isNewUser;
-                ViewBag.UserId = storedUserId;
+                var mobileNumber = TempData["MobileNumber"]?.ToString();
+                var nidDataJson = TempData["NIDData"]?.ToString();
+                var step = TempData["RegistrationStep"]?.ToString();
 
-                TempData.Keep("MobileNumber");
-                TempData.Keep("NIDData");
-                TempData.Keep("UserId");
-                TempData.Keep("IsNewUser");
-
-                return View();
-            }
-
-            // For existing users (login)
-            if (!isNewUser && !string.IsNullOrEmpty(storedUserId) && int.TryParse(storedUserId, out int existingUserId))
-            {
-                var user = await _dataService.GetUserById(existingUserId);
-                if (user != null)
+                if (string.IsNullOrEmpty(mobileNumber) || step != "otp_verification")
                 {
-                    // Set user session
-                    HttpContext.Session.SetInt32("UserId", user.Id);
-                    HttpContext.Session.SetString("UserName", user.FullNameBN);
-                    HttpContext.Session.SetString("UserNID", user.NIDNumber ?? "");
-
-                    return RedirectToAction("Dashboard", new { id = user.Id });
+                    return RedirectToAction("Login");
                 }
-            }
 
-            // For new user registration with password setup
-            if (isNewUser && !string.IsNullOrEmpty(nidDataJson))
-            {
-                // Validate passwords
-                if (string.IsNullOrEmpty(password) || password.Length < 8)
+                // Verify OTP
+                var isValidOtp = await _otpService.VerifyOtpAsync(mobileNumber, otp);
+                if (!isValidOtp)
                 {
-                    ViewBag.Error = "অনুগ্রহ করে কমপক্ষে ৮ অক্ষরের পাসওয়ার্ড দিন";
+                    ViewBag.Error = "ভুল OTP কোড। আবার চেষ্টা করুন।";
                     ViewBag.MobileNumber = mobileNumber;
-                    ViewBag.IsNewUser = true;
+                    ViewBag.NIDData = nidDataJson;
+                    ViewBag.RegistrationStep = "otp_verification";
 
                     TempData.Keep("MobileNumber");
                     TempData.Keep("NIDData");
-                    TempData.Keep("IsNewUser");
+                    TempData.Keep("IdNumber");
+                    TempData.Keep("RegistrationStep");
 
                     return View();
                 }
 
-                if (password != confirmPassword)
-                {
-                    ViewBag.Error = "পাসওয়ার্ড মিলছে না";
-                    ViewBag.MobileNumber = mobileNumber;
-                    ViewBag.IsNewUser = true;
-
-                    TempData.Keep("MobileNumber");
-                    TempData.Keep("NIDData");
-                    TempData.Keep("IsNewUser");
-
-                    return View();
-                }
-
-                // Validate password strength
-                if (!IsPasswordStrong(password))
-                {
-                    ViewBag.Error = "পাসওয়ার্ডে কমপক্ষে ১টি বড় হাতের অক্ষর, ১টি ছোট হাতের অক্ষর, ১টি সংখ্যা এবং ১টি বিশেষ অক্ষর থাকতে হবে";
-                    ViewBag.MobileNumber = mobileNumber;
-                    ViewBag.IsNewUser = true;
-
-                    TempData.Keep("MobileNumber");
-                    TempData.Keep("NIDData");
-                    TempData.Keep("IsNewUser");
-
-                    return View();
-                }
-
-                // Create new user from NID data with password
-                var nidData = JsonSerializer.Deserialize<NIDData>(nidDataJson);
+                // Deserialize NID data
+                var nidData = JsonSerializer.Deserialize<NIDData>(nidDataJson ?? "{}");
                 if (nidData == null)
                 {
                     ViewBag.Error = "NID তথ্য পাওয়া যায়নি";
-                    ViewBag.MobileNumber = mobileNumber;
-                    ViewBag.IsNewUser = true;
-
-                    TempData.Keep("MobileNumber");
-                    TempData.Keep("NIDData");
-                    TempData.Keep("IsNewUser");
-
                     return View();
                 }
 
-                var newUser = await _dataService.CreateUserFromNIDDataWithPassword(nidData, password);
-
-                if (newUser == null)
+                // Create user WITHOUT password - OTP-based authentication
+                // PasswordHash will be null initially, user can set it later if desired
+                var userId = await _dataService.CreateUserFromNIDData(nidData);
+                if (userId <= 0)
                 {
                     ViewBag.Error = "ব্যবহারকারী তৈরি করতে সমস্যা হয়েছে";
-                    ViewBag.MobileNumber = mobileNumber;
-                    ViewBag.IsNewUser = true;
-
-                    TempData.Keep("MobileNumber");
-                    TempData.Keep("NIDData");
-                    TempData.Keep("IsNewUser");
-
                     return View();
                 }
 
-                // Set user session
+                var newUser = await _dataService.GetUserById(userId);
+                if (newUser == null)
+                {
+                    ViewBag.Error = "ব্যবহারকারী পাওয়া যায়নি";
+                    return View();
+                }
+
+                // Generate JWT token
+                var token = _jwtService.GenerateToken(newUser.Id, newUser.MobileNumber, "Tenant");
+
+                // Set session
                 HttpContext.Session.SetInt32("UserId", newUser.Id);
                 HttpContext.Session.SetString("UserName", newUser.FullNameBN);
                 HttpContext.Session.SetString("UserNID", newUser.NIDNumber ?? "");
+                HttpContext.Session.SetString("JWTToken", token);
 
-                TempData["Success"] = "রেজিস্ট্রেশন সফল! আপনার অ্যাকাউন্ট তৈরি হয়েছে।";
+                await _loggingService.LogAuthenticationEventAsync(
+                    "REGISTRATION_SUCCESS",
+                    newUser.Id,
+                    mobileNumber,
+                    HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    true,
+                    "User registered successfully with OTP-based authentication (no password)"
+                );
 
-                return RedirectToAction("Dashboard", new { id = newUser.Id });
+                // Clear TempData
+                TempData.Remove("MobileNumber");
+                TempData.Remove("NIDData");
+                TempData.Remove("IdNumber");
+                TempData.Remove("RegistrationStep");
+
+                return RedirectToAction("Dashboard"/*, new { id = newUser.Id }*/);
             }
-
-            // Fallback - redirect to login
-            return RedirectToAction("Login", "Home");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in VerifyOTP");
+                await _loggingService.LogErrorAsync("Error in VerifyOTP", ex);
+                ViewBag.Error = "একটি ত্রুটি হয়েছে। পরে চেষ্টা করুন";
+                return View();
+            }
         }
 
+        /// <summary>
+        /// User dashboard showing completion percentage and profile sections
+        /// </summary>
+        /// <param name="id">User ID</param>
+        /// <returns>Dashboard view</returns>
         [HttpGet]
+        //[Authorize(Policy = "Tenant")]
         public async Task<IActionResult> Dashboard(int id)
         {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue || userId.Value != id)
+            {
+                return RedirectToAction("Login");
+            }
+
             var user = await _dataService.GetUserById(id);
             if (user == null)
+            {
                 return RedirectToAction("Login");
+            }
 
             var completionPercentage = await _dataService.CalculateCompletionPercentage(id);
             user.CompletionPercentage = completionPercentage;
@@ -317,6 +449,49 @@ namespace ThikanaTenantVerification.Controllers
             ViewBag.CompletionPercentage = completionPercentage;
             return View(user);
         }
+
+        /// <summary>
+        /// Logout user and clear session
+        /// </summary>
+        /// <returns>Redirects to landing page</returns>
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            var mobileNumber = HttpContext.Session.GetString("UserName");
+
+            HttpContext.Session.Clear();
+
+            if (userId.HasValue && !string.IsNullOrEmpty(mobileNumber))
+            {
+                _ = Task.Run(async () =>
+                {
+                    await _loggingService.LogAuthenticationEventAsync(
+                        "LOGOUT",
+                        userId.Value,
+                        mobileNumber,
+                        HttpContext.Connection.RemoteIpAddress?.ToString(),
+                        true,
+                        "User logged out"
+                    );
+                });
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        /// <summary>
+        /// Error page
+        /// </summary>
+        /// <returns>Error view</returns>
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        // Additional action methods for profile sections would go here...
+        // (EmergencyContact, FamilyMembers, HouseWorkers, etc. - keeping existing implementations)
 
         [HttpGet]
         public async Task<IActionResult> EmergencyContact(int userId)
@@ -520,176 +695,6 @@ namespace ThikanaTenantVerification.Controllers
             return File(pdfContent, "application/pdf", $"TenantVerification_{user.NIDNumber}.pdf");
         }
 
-        [HttpGet]
-        public IActionResult Logout()
-        {
-            HttpContext.Session.Clear();
-            return RedirectToAction("Index");
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-
-        // Add these methods to your HomeController class
-
-        [HttpGet]
-        public IActionResult Registration()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> VerifyNID(string idNumber, string mobileNumber)
-        {
-            try
-            {
-                // Validate inputs
-                if (string.IsNullOrEmpty(idNumber) || string.IsNullOrEmpty(mobileNumber))
-                {
-                    return Json(new { success = false, message = "অনুগ্রহ করে NID এবং মোবাইল নম্বর দিন" });
-                }
-
-                // Validate NID length
-                if (!(new[] { 10, 13, 14, 17 }.Contains(idNumber.Length)))
-                {
-                    return Json(new { success = false, message = "অনুগ্রহ করে সঠিক জাতীয় পরিচয়পত্র বা জন্ম নিবন্ধন নম্বর দিন (১০/১৩/১৪/১৭ ডিজিট)" });
-                }
-
-                // Validate mobile number
-                if (!System.Text.RegularExpressions.Regex.IsMatch(mobileNumber, @"^01[3-9]\d{8}$"))
-                {
-                    return Json(new { success = false, message = "অনুগ্রহ করে সঠিক মোবাইল নম্বর দিন" });
-                }
-
-                // Check if user already exists
-                var existingUser = await _dataService.GetUserByNIDAndMobile(idNumber, mobileNumber);
-                if (existingUser != null)
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = "এই NID এবং মোবাইল নম্বর দিয়ে ইতিমধ্যে রেজিস্ট্রেশন করা হয়েছে। লগইন করুন।"
-                    });
-                }
-
-                // Get NID data (simulated for demo)
-                var nidData = await _dataService.GetNIDDataAsync(idNumber);
-                if (nidData == null)
-                {
-                    // For demo, create mock NID data
-                    nidData = new NIDData
-                    {
-                        NIDNumber = idNumber,
-                        FullNameBN = "ডেমো ব্যবহারকারী",
-                        FullNameEN = "Demo User",
-                        FatherNameBN = "ডেমো পিতার নাম",
-                        FatherNameEN = "Demo Father Name",
-                        MotherNameBN = "ডেমো মাতার নাম",
-                        MotherNameEN = "Demo Mother Name",
-                        DateOfBirth = new DateTime(1990, 1, 1),
-                        Gender = "পুরুষ",
-                        MaritalStatus = "অবিবাহিত",
-                        Religion = "ইসলাম",
-                        MobileNumber = mobileNumber,
-                        Email = "demo@example.com",
-                        PermanentAddress = "ডেমো ঠিকানা, ঢাকা"
-                    };
-                }
-
-                // Save NID data in TempData for later steps
-                TempData["NIDData"] = JsonSerializer.Serialize(nidData);
-                TempData["MobileNumber"] = mobileNumber;
-                TempData["IsNewUser"] = true;
-
-                return Json(new
-                {
-                    success = true,
-                    message = "NID যাচাই সফল! OTP পাঠানো হয়েছে।",
-                    nidData = nidData
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "NID verification error");
-                return Json(new { success = false, message = "একটি ত্রুটি হয়েছে। পরে চেষ্টা করুন" });
-            }
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CompleteRegistration(string idNumber, string mobileNumber,
-            string password, string confirmPassword)
-        {
-            try
-            {
-                // Validate inputs
-                if (string.IsNullOrEmpty(password) || password.Length < 8)
-                {
-                    return Json(new { success = false, message = "অনুগ্রহ করে কমপক্ষে ৮ অক্ষরের পাসওয়ার্ড দিন" });
-                }
-
-                if (password != confirmPassword)
-                {
-                    return Json(new { success = false, message = "পাসওয়ার্ড মিলছে না" });
-                }
-
-                // Check password requirements
-                if (!IsPasswordStrong(password))
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = "পাসওয়ার্ডে কমপক্ষে ১টি বড় হাতের অক্ষর, ১টি ছোট হাতের অক্ষর, ১টি সংখ্যা এবং ১টি বিশেষ অক্ষর থাকতে হবে"
-                    });
-                }
-
-                // Get or create NID data
-                var nidData = await _dataService.GetNIDDataAsync(idNumber);
-                if (nidData == null)
-                {
-                    // Create demo NID data
-                    nidData = new NIDData
-                    {
-                        NIDNumber = idNumber,
-                        FullNameBN = "ডেমো ব্যবহারকারী",
-                        FullNameEN = "Demo User",
-                        FatherNameBN = "ডেমো পিতার নাম",
-                        FatherNameEN = "Demo Father Name",
-                        MotherNameBN = "ডেমো মাতার নাম",
-                        MotherNameEN = "Demo Mother Name",
-                        DateOfBirth = new DateTime(1990, 1, 1),
-                        Gender = "পুরুষ",
-                        MaritalStatus = "অবিবাহিত",
-                        Religion = "ইসলাম",
-                        MobileNumber = mobileNumber,
-                        Email = "demo@example.com",
-                        PermanentAddress = "ডেমো ঠিকানা, ঢাকা"
-                    };
-                }
-
-                // Create user with password
-                var newUser = await _dataService.CreateUserFromNIDDataWithPassword(nidData, password);
-
-                if (newUser == null)
-                {
-                    return Json(new { success = false, message = "ব্যবহারকারী তৈরি করতে সমস্যা হয়েছে" });
-                }
-
-                return Json(new
-                {
-                    success = true,
-                    message = "রেজিস্ট্রেশন সফল! লগইন পৃষ্ঠায় নিয়ে যাওয়া হচ্ছে...",
-                    userId = newUser.Id
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Registration error");
-                return Json(new { success = false, message = "একটি ত্রুটি হয়েছে। পরে চেষ্টা করুন" });
-            }
-        }
-
     }
 }
+

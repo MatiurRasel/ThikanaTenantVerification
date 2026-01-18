@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>লগইন - ঠিকানা যাচাইকরণ</title>
+    <title>লগইন ও নিবন্ধন - ঠিকানা যাচাইকরণ</title>
     <link href="https://fonts.maateen.me/solaiman-lipi/font.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -102,11 +102,6 @@
         .logo-sub {
             font-size: 0.8rem;
             opacity: 0.9;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 0.75rem;
         }
 
         /* Main Content */
@@ -224,49 +219,66 @@
             color: var(--text-light);
         }
 
-        /* Login Tabs */
-        .login-tabs {
+        /* Stepper */
+        .registration-stepper {
             display: flex;
-            gap: 1rem;
+            justify-content: center;
+            align-items: center;
             margin-bottom: 2rem;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 1rem;
+            display: none;
         }
 
-        .login-tab {
-            flex: 1;
-            padding: 0.75rem;
-            background: none;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            color: var(--text-light);
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: #e2e8f0;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
         }
 
-            .login-tab.active {
-                background: var(--police-blue);
-                color: var(--white);
-            }
+        .step.active .step-number {
+            background: var(--police-blue);
+            color: var(--white);
+            transform: scale(1.1);
+        }
 
-            .login-tab:hover:not(.active) {
-                background: #f1f5f9;
-            }
+        .step.completed .step-number {
+            background: var(--success-color);
+            color: var(--white);
+        }
+
+        .step-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        .step-line {
+            width: 60px;
+            height: 2px;
+            background: #e2e8f0;
+            position: relative;
+        }
 
         /* Form Content */
         .form-content {
-            display: none;
+            display: block;
             animation: fadeIn 0.5s ease;
         }
-
-            .form-content.active {
-                display: block;
-            }
 
         .form-group {
             margin-bottom: 1.25rem;
@@ -359,7 +371,7 @@
             font-size: 0.9rem;
         }
 
-        /* Button */
+        /* Buttons */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -388,13 +400,13 @@
                 box-shadow: 0 15px 35px rgba(13, 43, 108, 0.4);
             }
 
-        .btn-outline {
+        .btn-secondary {
             background: transparent;
             color: var(--police-blue);
             border: 2px solid var(--police-blue);
         }
 
-            .btn-outline:hover {
+            .btn-secondary:hover {
                 background: var(--police-blue);
                 color: var(--white);
             }
@@ -415,6 +427,12 @@
             color: var(--error-color);
         }
 
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+        }
+
         /* Registration Link */
         .registration-link {
             text-align: center;
@@ -429,7 +447,25 @@
                 color: var(--police-blue);
                 font-weight: 600;
                 text-decoration: none;
+                cursor: pointer;
             }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--white);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @@keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         /* Footer */
         .login-footer {
@@ -442,62 +478,57 @@
 
         /* Animations */
         @@keyframes fadeIn {
-            from
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
 
-        {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Responsive */
         @@media (max-width: 768px) {
-            .login-container
+            .login-container {
+                grid-template-columns: 1fr;
+            }
 
-        {
-            grid-template-columns: 1fr;
-        }
+            .info-panel {
+                display: none;
+            }
 
-        .info-panel {
-            display: none;
-        }
+            .login-panel {
+                padding: 1.5rem;
+            }
 
-        .login-panel {
-            padding: 1.5rem;
-        }
+            .info-card {
+                padding: 1.5rem;
+            }
 
-        .info-card {
-            padding: 1.5rem;
-        }
+            .header-container {
+                padding: 0 1rem;
+            }
 
-        .header-container {
-            padding: 0 1rem;
-        }
-
+            .demo-credentials {
+                grid-template-columns: 1fr;
+            }
         }
 
         @@media (max-height: 768px) {
-            .main-content
+            .main-content {
+                padding: 1rem;
+                min-height: calc(100vh - 100px);
+            }
 
-        {
-            padding: 1rem;
-            min-height: calc(100vh - 100px);
-        }
+            .login-panel {
+                padding: 1.5rem;
+            }
 
-        .login-panel {
-            padding: 1.5rem;
-        }
-
-        .info-card {
-            padding: 1.5rem;
-        }
-
+            .info-card {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -516,7 +547,7 @@
             </a>
 
             <div class="header-actions">
-                <a href="@Url.Action("Registration", "Home")" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                <a href="#" onclick="showRegistration()" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
                     <i class="fas fa-user-plus"></i>
                     রেজিস্ট্রেশন
                 </a>
@@ -575,21 +606,28 @@
 
             <!-- Right Login Panel -->
             <div class="login-panel">
-                <div class="form-header">
-                    <h2 class="form-title">অ্যাকাউন্টে প্রবেশ করুন</h2>
-                    <p class="form-subtitle">আপনার মোবাইল নম্বর ও পাসওয়ার্ড ব্যবহার করুন</p>
+                @Html.AntiForgeryToken()
+                <!-- Registration Stepper -->
+                <div class="registration-stepper" id="registrationStepper">
+                    <div class="step" id="step1">
+                        <div class="step-number">১</div>
+                        <div class="step-label">NID যাচাই</div>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" id="step2">
+                        <div class="step-number">২</div>
+                        <div class="step-label">OTP যাচাই</div>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" id="step3">
+                        <div class="step-number">৩</div>
+                        <div class="step-label">পাসওয়ার্ড</div>
+                    </div>
                 </div>
 
-                <!-- Login Tabs -->
-                <div class="login-tabs">
-                    <button class="login-tab active" onclick="showForm('existing')">
-                        <i class="fas fa-sign-in-alt"></i>
-                        লগইন
-                    </button>
-                    <button class="login-tab" onclick="showForm('new')">
-                        <i class="fas fa-user-plus"></i>
-                        নিবন্ধন করুন
-                    </button>
+                <div class="form-header">
+                    <h2 class="form-title" id="formTitle">অ্যাকাউন্টে প্রবেশ করুন</h2>
+                    <p class="form-subtitle" id="formSubtitle">আপনার মোবাইল নম্বরে OTP পাঠান</p>
                 </div>
 
                 @if (ViewBag.Error != null)
@@ -600,131 +638,166 @@
                     </div>
                 }
 
-                <!-- Existing User Login (Mobile + Password) -->
-                <div id="existingForm" class="form-content active">
-                    <form method="post" action="@Url.Action("UserLogin", "Home")">
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-mobile-alt"></i>
-                                মোবাইল নম্বর
-                            </label>
-                            <div class="input-group">
-                                <i class="fas fa-phone"></i>
-                                <input type="tel"
-                                       name="username"
-                                       class="form-control"
-                                       placeholder="০১XXXXXXXXX"
-                                       pattern="01[3-9]\d{8}"
-                                       required>
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        @TempData["Success"]
+                    </div>
+                }
+
+                <!-- Login Form - OTP Based (No Password) -->
+                <div id="loginForm" class="form-content">
+                    @Html.AntiForgeryToken()
+                    
+                    <!-- Step 1: Request OTP -->
+                    <div id="loginStep1">
+                        <form id="requestOtpForm">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    মোবাইল নম্বর
+                                </label>
+                                <div class="input-group">
+                                    <i class="fas fa-phone"></i>
+                                    <input type="tel"
+                                           id="loginMobile"
+                                           class="form-control"
+                                           placeholder="০১XXXXXXXXX"
+                                           pattern="01[3-9]\d{8}"
+                                           required>
+                                </div>
                             </div>
+
+                            
+
+                            <button type="button" class="btn btn-primary" id="requestOtpBtn" onclick="requestLoginOtp()">
+                                <span id="requestOtpText">
+                                    <i class="fas fa-paper-plane"></i>
+                                    OTP পাঠান
+                                </span>
+                                <div class="spinner" id="requestOtpSpinner" style="display: none;"></div>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Step 2: Verify OTP -->
+                    <div id="loginStep2" style="display: none;">
+                        <div class="mobile-info" style="margin-bottom: 1.5rem;">
+                            <p>OTP পাঠানো হয়েছে:</p>
+                            <div class="mobile-number" id="otpMobileNumber"></div>
                         </div>
 
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-lock"></i>
-                                পাসওয়ার্ড
-                            </label>
-                            <div class="input-group">
-                                <i class="fas fa-key"></i>
-                                <input type="password"
-                                       name="password"
-                                       class="form-control"
-                                       placeholder="পাসওয়ার্ড দিন"
-                                       required>
-                            </div>
-                        </div>
-
-                        <div class="demo-box">
+                        <div class="demo-box" id="demoOtpBox" style="display: none;">
                             <div class="demo-header">
-                                <i class="fas fa-user-secret"></i>
-                                <span>ডেমো একাউন্ট</span>
+                                <i class="fas fa-code"></i>
+                                <span>ডেমো OTP</span>
                             </div>
                             <div class="demo-credentials">
                                 <div class="demo-item">
-                                    <div class="demo-label">মোবাইল নম্বর</div>
-                                    <div class="demo-value">01712345678</div>
-                                </div>
-                                <div class="demo-item">
-                                    <div class="demo-label">পাসওয়ার্ড</div>
-                                    <div class="demo-value">Test@123</div>
+                                    <div class="demo-label">OTP কোড</div>
+                                    <div class="demo-value" id="demoOtpCode">123456</div>
                                 </div>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-sign-in-alt"></i>
-                            লগইন করুন
-                        </button>
-                    </form>
+                        <form id="verifyOtpForm">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-keyboard"></i>
+                                    OTP কোড
+                                </label>
+                                <div class="input-group">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="text"
+                                           id="loginOtp"
+                                           class="form-control"
+                                           placeholder="৬ ডিজিটের OTP দিন"
+                                           pattern="\d{6}"
+                                           maxlength="6"
+                                           required>
+                                </div>
+                                <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-light);">
+                                    <i class="fas fa-info-circle"></i>
+                                    OTP এর মেয়াদ: <span id="otpTimer" class="timer-value">05:00</span>
+                                </p>
+                            </div>
+
+                            <div class="action-buttons" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                <button type="button" class="btn btn-secondary" onclick="backToStep1()" style="flex: 0.5;">
+                                    <i class="fas fa-arrow-left"></i>
+                                    ফিরে যান
+                                </button>
+                                <button type="button" class="btn btn-primary" id="verifyOtpBtn" onclick="verifyLoginOtp()" style="flex: 1;">
+                                    <span id="verifyOtpText">
+                                        <i class="fas fa-check-circle"></i>
+                                        OTP যাচাই করুন
+                                    </span>
+                                    <div class="spinner" id="verifyOtpSpinner" style="display: none;"></div>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="registration-link">
+                        <p id="registrationLink">
+                            প্রথমবার ব্যবহার করছেন?
+                            <a href="#" onclick="showRegistration()">নিবন্ধন করুন</a>
+                        </p>
+                    </div>
                 </div>
 
-                <!-- New User Registration (NID + Mobile) -->
-                <div id="newForm" class="form-content">
-                    <form method="post" action="@Url.Action("Login", "Home")">
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-id-card"></i>
-                                জাতীয় পরিচয়পত্র নম্বর
-                            </label>
-                            <div class="input-group">
-                                <i class="fas fa-id-card"></i>
-                                <input type="text"
-                                       name="idNumber"
-                                       class="form-control"
-                                       placeholder="১০, ১৩, ১৪ বা ১৭ ডিজিটের নম্বর"
-                                       pattern="[0-9]{10}|[0-9]{13}|[0-9]{14}|[0-9]{17}"
-                                       required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-mobile-alt"></i>
-                                মোবাইল নম্বর
-                            </label>
-                            <div class="input-group">
-                                <i class="fas fa-phone"></i>
-                                <input type="tel"
-                                       name="mobileNumber"
-                                       class="form-control"
-                                       placeholder="০১XXXXXXXXX"
-                                       pattern="01[3-9]\d{8}"
-                                       required>
-                            </div>
-                        </div>
-
-                        <div class="demo-box">
-                            <div class="demo-header">
-                                <i class="fas fa-user-secret"></i>
-                                <span>ডেমো একাউন্ট</span>
-                            </div>
-                            <div class="demo-credentials">
-                                <div class="demo-item">
-                                    <div class="demo-label">NID নম্বর</div>
-                                    <div class="demo-value">1990123456789</div>
-                                </div>
-                                <div class="demo-item">
-                                    <div class="demo-label">মোবাইল নম্বর</div>
-                                    <div class="demo-value">01712345678</div>
+                <!-- Registration Form -->
+                <div id="registrationForm" class="form-content" style="display: none;">
+                    <!-- Step 1: NID Verification -->
+                    <div id="registrationStep1">
+                        @Html.AntiForgeryToken()
+                        <form id="nidVerificationForm">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-id-card"></i>
+                                    জাতীয় পরিচয়পত্র নম্বর
+                                </label>
+                                <div class="input-group">
+                                    <i class="fas fa-id-card"></i>
+                                    <input type="text"
+                                           id="idNumber"
+                                           class="form-control"
+                                           placeholder="১০, ১৩, ১৪ বা ১৭ ডিজিটের নম্বর"
+                                           pattern="[0-9]{10}|[0-9]{13}|[0-9]{14}|[0-9]{17}"
+                                           required>
                                 </div>
                             </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    মোবাইল নম্বর
+                                </label>
+                                <div class="input-group">
+                                    <i class="fas fa-phone"></i>
+                                    <input type="tel"
+                                           id="mobileNumber"
+                                           class="form-control"
+                                           placeholder="০১XXXXXXXXX"
+                                           pattern="01[3-9]\d{8}"
+                                           required>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-primary" id="verifyNIDBtn" onclick="verifyNID()">
+                                <span id="verifyNIDText">পরবর্তী</span>
+                                <div class="spinner" id="verifyNIDSpinner" style="display: none;"></div>
+                            </button>
+                        </form>
+
+                        <div class="registration-link">
+                            <p>
+                                ইতিমধ্যে একাউন্ট আছে?
+                                <a href="#" onclick="showLogin()">লগইন করুন</a>
+                            </p>
                         </div>
-
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-arrow-right"></i>
-                            পরবর্তী ধাপ
-                        </button>
-                    </form>
-                </div>
-
-                <div class="registration-link">
-                    <p>
-                        @if (ViewBag.Error == null)
-                        {
-                            <span id="registrationText">প্রথমবার ব্যবহার করছেন? <a href="#" onclick="showForm('new')">নিবন্ধন করুন</a></span>
-                            <span id="loginText" style="display: none;">ইতিমধ্যে একাউন্ট আছে? <a href="#" onclick="showForm('existing')">লগইন করুন</a></span>
-                        }
-                    </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -738,39 +811,227 @@
     </footer>
 
     <script>
-        // Form switching
-        function showForm(formType) {
-            // Hide all forms
-            document.querySelectorAll('.form-content').forEach(form => {
-                form.classList.remove('active');
+        // Show registration form
+        function showRegistration() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registrationForm').style.display = 'block';
+            document.getElementById('registrationStepper').style.display = 'flex';
+            document.getElementById('formTitle').textContent = 'নতুন নিবন্ধন';
+            document.getElementById('formSubtitle').textContent = 'আপনার NID এবং মোবাইল নম্বর দিন';
+
+            // Update stepper
+            updateStepper(1);
+
+            // Focus on first input
+            document.getElementById('idNumber').focus();
+        }
+
+        // Show login form
+        function showLogin() {
+            document.getElementById('registrationForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registrationStepper').style.display = 'none';
+            document.getElementById('formTitle').textContent = 'অ্যাকাউন্টে প্রবেশ করুন';
+            document.getElementById('formSubtitle').textContent = 'আপনার মোবাইল নম্বর ও পাসওয়ার্ড ব্যবহার করুন';
+
+            // Focus on mobile input
+            document.getElementById('loginMobile').focus();
+        }
+
+        // Update stepper
+        function updateStepper(step) {
+            // Reset all steps
+            document.querySelectorAll('.step').forEach(s => {
+                s.classList.remove('active', 'completed');
             });
 
-            // Remove active from all tabs
-            document.querySelectorAll('.login-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
+            // Set current step as active
+            document.getElementById(`step${step}`).classList.add('active');
 
-            // Show selected form
-            document.getElementById(formType + 'Form').classList.add('active');
-
-            // Activate selected tab
-            document.querySelectorAll('.login-tab').forEach(tab => {
-                if (tab.textContent.includes(formType === 'existing' ? 'লগইন' : 'নিবন্ধন')) {
-                    tab.classList.add('active');
-                }
-            });
-
-            // Update registration link
-            if (formType === 'existing') {
-                document.getElementById('registrationText').style.display = 'inline';
-                document.getElementById('loginText').style.display = 'none';
-            } else {
-                document.getElementById('registrationText').style.display = 'none';
-                document.getElementById('loginText').style.display = 'inline';
+            // Set previous steps as completed
+            for (let i = 1; i < step; i++) {
+                document.getElementById(`step${i}`).classList.add('completed');
             }
         }
 
-        // Input auto-formatting
+
+                 // Verify NID and mobile
+        async function verifyNID() {
+            const idNumber = document.getElementById('idNumber').value;
+            const mobileNumber = document.getElementById('mobileNumber').value;
+            const btn = document.getElementById('verifyNIDBtn');
+            const btnText = document.getElementById('verifyNIDText');
+            const spinner = document.getElementById('verifyNIDSpinner');
+
+            // Validate inputs
+            if (!idNumber || idNumber.length < 10) {
+                alert('অনুগ্রহ করে সঠিক NID নম্বর দিন (১০ ডিজিট বা বেশি)');
+                return;
+            }
+
+            if (!mobileNumber || mobileNumber.length !== 11 || !mobileNumber.startsWith('01')) {
+                alert('অনুগ্রহ করে সঠিক মোবাইল নম্বর দিন (১১ ডিজিট, ০১ দিয়ে শুরু)');
+                return;
+            }
+
+            // Show loading
+            btn.disabled = true;
+            btnText.textContent = 'যাচাই হচ্ছে...';
+            spinner.style.display = 'block';
+
+            try {
+                console.log('Sending registration request...');
+
+                // Get anti-forgery token - IMPORTANT!
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                console.log('Anti-forgery token found:', !!token);
+                if (token) {
+                    console.log('Token value exists:', token.value.length > 0);
+                }
+
+                // Method 1: Using FormData (recommended)
+                const formData = new FormData();
+                formData.append('idNumber', idNumber);
+                formData.append('mobileNumber', mobileNumber);
+
+                // Add anti-forgery token if found
+                if (token && token.value) {
+                    formData.append('__RequestVerificationToken', token.value);
+                } else {
+                    console.warn('Warning: No anti-forgery token found!');
+                }
+
+                const response = await fetch('/Home/Register', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        // Don't set Content-Type for FormData - let browser set it
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                console.log('Response status:', response.status, response.statusText);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Server error response:', errorText);
+
+                    if (response.status === 400) {
+                        // Try different approach if 400 persists
+                        console.log('Trying alternative method...');
+                        return await tryAlternativeMethod(idNumber, mobileNumber, token);
+                    }
+
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                console.log('Success!', result);
+
+                if (result.success) {
+                    window.location.href = '/Home/VerifyOTP';
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('ত্রুটি: ' + error.message + '\nদয়া করে পৃষ্ঠাটি রিফ্রেশ করুন এবং আবার চেষ্টা করুন।');
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'পরবর্তী';
+                spinner.style.display = 'none';
+            }
+        }
+
+        // Alternative method if first one fails
+        async function tryAlternativeMethod(idNumber, mobileNumber, token) {
+            console.log('Trying alternative method (URLSearchParams)...');
+
+            const params = new URLSearchParams();
+            params.append('idNumber', idNumber);
+            params.append('mobileNumber', mobileNumber);
+
+            if (token && token.value) {
+                params.append('__RequestVerificationToken', token.value);
+            }
+
+            const response = await fetch('/Home/Register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Alternative method failed: ${response.status} - ${errorText}`);
+            }
+
+            return await response.json();
+        }
+
+        // Quick test function
+        function testAntiForgeryToken() {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) {
+                console.log('✅ Anti-forgery token FOUND!');
+                console.log('Token length:', token.value.length);
+                console.log('Token starts with:', token.value.substring(0, 20) + '...');
+                return true;
+            } else {
+                console.log('❌ Anti-forgery token NOT FOUND!');
+                console.log('All hidden inputs:', document.querySelectorAll('input[type="hidden"]'));
+                return false;
+            }
+        }
+
+        // Test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== DEBUG INFO ===');
+            testAntiForgeryToken();
+
+            // Also test with jQuery selector
+            const jqToken = $('input[name="__RequestVerificationToken"]');
+            console.log('jQuery found token:', jqToken.length > 0);
+        });
+                // Fallback method if AJAX fails
+        function useFallbackRegistration(idNumber, mobileNumber) {
+            console.log('Using fallback registration method...');
+
+            // Create a hidden form and submit it
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/Home/RegisterDirect'; // Create this endpoint as fallback
+
+            const nidInput = document.createElement('input');
+            nidInput.type = 'hidden';
+            nidInput.name = 'idNumber';
+            nidInput.value = idNumber;
+
+            const mobileInput = document.createElement('input');
+            mobileInput.type = 'hidden';
+            mobileInput.name = 'mobileNumber';
+            mobileInput.value = mobileNumber;
+
+            form.appendChild(nidInput);
+            form.appendChild(mobileInput);
+
+            // Add anti-forgery token if exists
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) {
+                const tokenClone = token.cloneNode(true);
+                form.appendChild(tokenClone);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        // Auto-fill demo credentials on page load
         document.addEventListener('DOMContentLoaded', function() {
             // Format mobile number inputs
             document.querySelectorAll('input[type="tel"]').forEach(input => {
@@ -782,12 +1043,179 @@
             });
 
             // Format NID input
-            document.querySelector('input[name="idNumber"]')?.addEventListener('input', function(e) {
+            document.getElementById('idNumber')?.addEventListener('input', function(e) {
                 let value = e.target.value.replace(/\D/g, '');
                 if (value.length > 17) value = value.slice(0, 17);
                 e.target.value = value;
             });
+
         });
+
+        
+        // Request Login OTP
+        async function requestLoginOtp() {
+            const mobileNumber = document.getElementById('loginMobile').value;
+            const btn = document.getElementById('requestOtpBtn');
+            const btnText = document.getElementById('requestOtpText');
+            const spinner = document.getElementById('requestOtpSpinner');
+
+            if (!mobileNumber || mobileNumber.length !== 11 || !mobileNumber.startsWith('01')) {
+                alert('অনুগ্রহ করে সঠিক মোবাইল নম্বর দিন (১১ ডিজিট, ০১ দিয়ে শুরু)');
+                return;
+            }
+
+            // Show loading
+            btn.disabled = true;
+            btnText.innerHTML = 'OTP পাঠানো হচ্ছে...';
+            spinner.style.display = 'inline-block';
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                const formData = new FormData();
+                formData.append('mobileNumber', mobileNumber);
+                if (token && token.value) {
+                    formData.append('__RequestVerificationToken', token.value);
+                }
+
+                const response = await fetch('/Home/RequestLoginOtp', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Show step 2
+                    document.getElementById('loginStep1').style.display = 'none';
+                    document.getElementById('loginStep2').style.display = 'block';
+                    document.getElementById('otpMobileNumber').textContent = mobileNumber;
+                    document.getElementById('formTitle').textContent = 'OTP যাচাই করুন';
+                    document.getElementById('formSubtitle').textContent = 'আপনার মোবাইল নম্বরে পাঠানো OTP দিন';
+
+                    // Show demo OTP if available
+                    if (result.demoOtp) {
+                        document.getElementById('demoOtpCode').textContent = result.demoOtp;
+                        document.getElementById('demoOtpBox').style.display = 'block';
+                        // Auto-fill OTP
+                        setTimeout(() => {
+                            document.getElementById('loginOtp').value = result.demoOtp;
+                        }, 500);
+                    }
+
+                    // Start timer
+                    startOtpTimer();
+                } else {
+                    alert(result.message || 'ত্রুটি: OTP পাঠাতে সমস্যা হয়েছে');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('ত্রুটি: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btnText.innerHTML = '<i class="fas fa-paper-plane"></i> OTP পাঠান';
+                spinner.style.display = 'none';
+            }
+        }
+
+        // Verify Login OTP
+        async function verifyLoginOtp() {
+            const mobileNumber = document.getElementById('loginMobile').value;
+            const otpCode = document.getElementById('loginOtp').value;
+            const btn = document.getElementById('verifyOtpBtn');
+            const btnText = document.getElementById('verifyOtpText');
+            const spinner = document.getElementById('verifyOtpSpinner');
+
+            if (!otpCode || otpCode.length !== 6) {
+                alert('অনুগ্রহ করে ৬ ডিজিটের OTP দিন');
+                return;
+            }
+
+            // Show loading
+            btn.disabled = true;
+            btnText.innerHTML = 'যাচাই করা হচ্ছে...';
+            spinner.style.display = 'inline-block';
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                const formData = new FormData();
+                formData.append('mobileNumber', mobileNumber);
+                formData.append('otpCode', otpCode);
+                if (token && token.value) {
+                    formData.append('__RequestVerificationToken', token.value);
+                }
+
+                const response = await fetch('/Home/VerifyLoginOtp', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Redirect to dashboard
+                    if (result.redirectUrl) {
+                        window.location.href = result.redirectUrl;
+                    } else {
+                        window.location.href = '/Home/Dashboard';
+                    }
+                } else {
+                    alert(result.message || 'ভুল OTP কোড');
+                    btn.disabled = false;
+                    btnText.innerHTML = '<i class="fas fa-check-circle"></i> OTP যাচাই করুন';
+                    spinner.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('ত্রুটি: ' + error.message);
+                btn.disabled = false;
+                btnText.innerHTML = '<i class="fas fa-check-circle"></i> OTP যাচাই করুন';
+                spinner.style.display = 'none';
+            }
+        }
+
+        // Back to step 1
+        function backToStep1() {
+            document.getElementById('loginStep2').style.display = 'none';
+            document.getElementById('loginStep1').style.display = 'block';
+            document.getElementById('formTitle').textContent = 'অ্যাকাউন্টে প্রবেশ করুন';
+            document.getElementById('formSubtitle').textContent = 'আপনার মোবাইল নম্বরে OTP পাঠান';
+            document.getElementById('loginOtp').value = '';
+        }
+
+        // OTP Timer
+        let otpTimeLeft = 300; // 5 minutes
+        let otpTimerInterval = null;
+
+        function startOtpTimer() {
+            const timerElement = document.getElementById('otpTimer');
+            if (!timerElement) return;
+
+            otpTimeLeft = 300;
+            if (otpTimerInterval) clearInterval(otpTimerInterval);
+
+            otpTimerInterval = setInterval(() => {
+                const minutes = Math.floor(otpTimeLeft / 60);
+                const seconds = otpTimeLeft % 60;
+                timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                if (otpTimeLeft <= 0) {
+                    clearInterval(otpTimerInterval);
+                    timerElement.textContent = '00:00';
+                    timerElement.style.color = 'var(--error-color)';
+                    document.getElementById('verifyOtpBtn').disabled = true;
+                } else {
+                    otpTimeLeft--;
+                }
+            }, 1000);
+        }
     </script>
 </body>
 </html>

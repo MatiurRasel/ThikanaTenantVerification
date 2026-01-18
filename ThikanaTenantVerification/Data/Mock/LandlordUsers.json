@@ -1,0 +1,63 @@
+[
+  {
+    "Id": 1,
+    "NameBN": "মোঃ রফিকুল ইসলাম",
+    "NameEN": "Md. Rafiqul Islam",
+    "MobileNumber": "01711111111",
+    "NIDNumber": "1975123456789",
+    "Email": "rafiqul.islam@gmail.com",
+    "Address": "১৫০, গুলশান-২, ঢাকা-১২১২",
+    "IsActive": true,
+    "CreatedAt": "2023-01-15T00:00:00",
+    "LastLogin": null
+  },
+  {
+    "Id": 2,
+    "NameBN": "সালমা বেগম",
+    "NameEN": "Salma Begum",
+    "MobileNumber": "01822222222",
+    "NIDNumber": "1978123456789",
+    "Email": "salma.begum@gmail.com",
+    "Address": "২৮০, ধানমন্ডি, ঢাকা-১২০৫",
+    "IsActive": true,
+    "CreatedAt": "2023-02-20T00:00:00",
+    "LastLogin": null
+  },
+  {
+    "Id": 3,
+    "NameBN": "মোঃ করিম উদ্দিন",
+    "NameEN": "Md. Karim Uddin",
+    "MobileNumber": "01933333333",
+    "NIDNumber": "1970123456789",
+    "Email": "karim.uddin@gmail.com",
+    "Address": "৩৫০, উত্তরা, ঢাকা-১২৩০",
+    "IsActive": true,
+    "CreatedAt": "2023-03-10T00:00:00",
+    "LastLogin": null
+  },
+  {
+    "Id": 4,
+    "NameBN": "ফাতেমা খাতুন",
+    "NameEN": "Fatema Khatun",
+    "MobileNumber": "01744444444",
+    "NIDNumber": "1976123456789",
+    "Email": "fatema.khatun@gmail.com",
+    "Address": "৫০০, মিরপুর, ঢাকা-১২১৬",
+    "IsActive": true,
+    "CreatedAt": "2023-04-05T00:00:00",
+    "LastLogin": null
+  },
+  {
+    "Id": 5,
+    "NameBN": "মোঃ আবুল কাসেম",
+    "NameEN": "Md. Abul Kasem",
+    "MobileNumber": "01855555555",
+    "NIDNumber": "1965123456789",
+    "Email": "abul.kasem@gmail.com",
+    "Address": "৭৫০, বনানী, ঢাকা-১২১৩",
+    "IsActive": true,
+    "CreatedAt": "2023-05-12T00:00:00",
+    "LastLogin": null
+  }
+]
+

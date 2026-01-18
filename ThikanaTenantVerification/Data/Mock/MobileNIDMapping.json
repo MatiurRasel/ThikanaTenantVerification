@@ -1,0 +1,72 @@
+[
+  {
+    "MobileNumber": "01712345678",
+    "NIDNumber": "1991234567890",
+    "IsValid": true,
+    "VerificationDate": "2024-01-15"
+  },
+  {
+    "MobileNumber": "01812345678",
+    "NIDNumber": "1992345678901",
+    "IsValid": true,
+    "VerificationDate": "2024-01-20"
+  },
+  {
+    "MobileNumber": "01912345678",
+    "NIDNumber": "1985123456789",
+    "IsValid": true,
+    "VerificationDate": "2024-01-22"
+  },
+  {
+    "MobileNumber": "01723456789",
+    "NIDNumber": "1993456789012",
+    "IsValid": true,
+    "VerificationDate": "2024-02-01"
+  },
+  {
+    "MobileNumber": "01823456789",
+    "NIDNumber": "1994567890123",
+    "IsValid": true,
+    "VerificationDate": "2024-01-25"
+  },
+  {
+    "MobileNumber": "01923456789",
+    "NIDNumber": "1988123456789",
+    "IsValid": true,
+    "VerificationDate": "2024-01-18"
+  },
+  {
+    "MobileNumber": "01734567890",
+    "NIDNumber": "1987123456789",
+    "IsValid": true,
+    "VerificationDate": "2024-01-10"
+  },
+  {
+    "MobileNumber": "01834567890",
+    "NIDNumber": "1995678901234",
+    "IsValid": true,
+    "VerificationDate": "2024-02-05"
+  },
+  {
+    "MobileNumber": "01700000000",
+    "NIDNumber": null,
+    "IsValid": false,
+    "VerificationDate": null,
+    "Remarks": "Test number - No NID associated"
+  },
+  {
+    "MobileNumber": "01800000000",
+    "NIDNumber": null,
+    "IsValid": false,
+    "VerificationDate": null,
+    "Remarks": "Test number - No NID associated"
+  },
+  {
+    "MobileNumber": "01900000000",
+    "NIDNumber": null,
+    "IsValid": false,
+    "VerificationDate": null,
+    "Remarks": "Test number - No NID associated"
+  }
+]
+

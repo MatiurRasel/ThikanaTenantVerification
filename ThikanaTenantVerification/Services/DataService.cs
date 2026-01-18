@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using ThikanaTenantVerification.Data;
@@ -69,11 +70,19 @@ namespace ThikanaTenantVerification.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<DataService> _logger;
+        private readonly IApiMockService _apiMockService;
 
-        public DataService(ApplicationDbContext context, ILogger<DataService> logger)
+        /// <summary>
+        /// Initializes a new instance of DataService
+        /// </summary>
+        /// <param name="context">Database context</param>
+        /// <param name="logger">Logger instance</param>
+        /// <param name="apiMockService">API mock service for NID and Police verification</param>
+        public DataService(ApplicationDbContext context, ILogger<DataService> logger, IApiMockService apiMockService)
         {
             _context = context;
             _logger = logger;
+            _apiMockService = apiMockService;
         }
 
         #region User Methods
@@ -114,18 +123,61 @@ namespace ThikanaTenantVerification.Services
             }
         }
 
+        // In your DataService or Repository class
         public async Task<User?> GetUserByNIDAndMobile(string nid, string mobile)
         {
             try
             {
-                return await _context.Users
+                _logger.LogInformation($"GetUserByNIDAndMobile called with NID: {nid}, Mobile: {mobile}");
+
+                // Check if context is available
+                if (_context == null)
+                {
+                    _logger.LogError("Database context is null!");
+                    return null;
+                }
+
+                // Check if Users DbSet exists
+                if (_context.Users == null)
+                {
+                    _logger.LogError("Users DbSet is null!");
+                    return null;
+                }
+
+                _logger.LogInformation($"Users DbSet type: {_context.Users.GetType().Name}");
+                _logger.LogInformation($"Database connection string: {_context.Database.GetConnectionString()}");
+
+                // Try to check if we can connect to database
+                var canConnect = await _context.Database.CanConnectAsync();
+                _logger.LogInformation($"Can connect to database: {canConnect}");
+
+                if (!canConnect)
+                {
+                    _logger.LogError("Cannot connect to database!");
+                    return null;
+                }
+
+                // Try a simple query first
+                var userCount = await _context.Users.CountAsync();
+                _logger.LogInformation($"Total users in database: {userCount}");
+
+                // Now try the actual query
+                var user = await _context.Users
                     .FirstOrDefaultAsync(u =>
                         (u.NIDNumber == nid || u.BirthCertificateNumber == nid) &&
                         u.MobileNumber == mobile);
+
+                _logger.LogInformation($"Query completed. User found: {user != null}");
+
+                return user;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting user by NID and mobile: {NID}, {Mobile}", nid, mobile);
+                _logger.LogError(ex, $"Error getting user by NID and mobile: {nid}, {mobile}");
+                _logger.LogError($"Exception type: {ex.GetType().Name}");
+                _logger.LogError($"Exception message: {ex.Message}");
+                _logger.LogError($"Inner exception: {ex.InnerException?.Message}");
+                _logger.LogError($"Stack trace: {ex.StackTrace}");
                 return null;
             }
         }
@@ -230,10 +282,25 @@ namespace ThikanaTenantVerification.Services
             }
         }
 
+        /// <summary>
+        /// Creates a new user from NID data WITHOUT password (OTP-based authentication)
+        /// PasswordHash is set to null - user can set password later if desired
+        /// </summary>
+        /// <param name="nidData">NID data from government API</param>
+        /// <returns>User ID if successful, -1 if error</returns>
         public async Task<int> CreateUserFromNIDData(NIDData nidData)
         {
             try
             {
+                // Check if user already exists
+                var existingUser = await GetUserByNIDAndMobile(nidData.NIDNumber, nidData.MobileNumber);
+                if (existingUser != null)
+                {
+                    _logger.LogWarning("User already exists with NID: {NID}, Mobile: {Mobile}", 
+                        nidData.NIDNumber, nidData.MobileNumber);
+                    return existingUser.Id;
+                }
+
                 var user = new User
                 {
                     NIDNumber = nidData.NIDNumber,
@@ -252,17 +319,39 @@ namespace ThikanaTenantVerification.Services
                     Email = nidData.Email,
                     PermanentAddress = nidData.PermanentAddress,
                     ProfileImage = nidData.ProfileImage,
-                    PasswordHash = HashPassword("Default@123"),
+                    PasswordHash = null, // NO PASSWORD - OTP-based authentication
                     IsVerified = false,
                     VerificationStatus = "Pending",
-                    CompletionPercentage = 0,
+                    CompletionPercentage = 25, // Initial completion after basic info auto-filled
                     RegistrationDate = DateTime.Now,
                     CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
+                    UpdatedAt = DateTime.Now,
+                    IsActive = true
                 };
 
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
+
+                // Create verification log
+                await CreateVerificationLog(user.Id, "System", "System", "Registration", "Pending",
+                    "User registered via OTP-based authentication (no password)");
+
+                // Create verification request
+                var verificationRequest = new VerificationRequest
+                {
+                    UserId = user.Id,
+                    RequestType = "New",
+                    Status = "Pending",
+                    Priority = "Normal",
+                    RequestedAt = DateTime.Now
+                };
+
+                _context.VerificationRequests.Add(verificationRequest);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("User created successfully with ID: {UserId}, NID: {NID} (OTP-based, no password)", 
+                    user.Id, user.NIDNumber);
+
                 return user.Id;
             }
             catch (Exception ex)
@@ -382,31 +471,16 @@ namespace ThikanaTenantVerification.Services
 
         #region NID Data Methods
 
+        /// <summary>
+        /// Gets NID data from government API (via mock service for demo)
+        /// </summary>
+        /// <param name="idNumber">NID or Birth Certificate number</param>
+        /// <returns>NIDData object if found, null otherwise</returns>
         public async Task<NIDData?> GetNIDDataAsync(string idNumber)
         {
             try
             {
-                // For demo purposes, create mock NID data
-                // In production, this would call a government API
-                await Task.Delay(500); // Simulate API call
-
-                return new NIDData
-                {
-                    NIDNumber = idNumber,
-                    FullNameBN = "ডেমো ব্যবহারকারী",
-                    FullNameEN = "Demo User",
-                    FatherNameBN = "ডেমো পিতার নাম",
-                    FatherNameEN = "Demo Father Name",
-                    MotherNameBN = "ডেমো মাতার নাম",
-                    MotherNameEN = "Demo Mother Name",
-                    DateOfBirth = new DateTime(1990, 1, 1),
-                    Gender = "পুরুষ",
-                    MaritalStatus = "অবিবাহিত",
-                    Religion = "ইসলাম",
-                    MobileNumber = "01712345678",
-                    Email = "demo@example.com",
-                    PermanentAddress = "ডেমো ঠিকানা, ঢাকা"
-                };
+                return await _apiMockService.GetNIDDataAsync(idNumber);
             }
             catch (Exception ex)
             {
@@ -669,32 +743,18 @@ namespace ThikanaTenantVerification.Services
 
         #region Police Verification Methods
 
+        /// <summary>
+        /// Gets all police verification data (for admin/display purposes)
+        /// </summary>
+        /// <returns>List of PoliceVerificationData</returns>
         public async Task<List<PoliceVerificationData>> GetPoliceVerificationData()
         {
             try
             {
-                // For demo, return mock data
+                // This method is kept for backward compatibility
+                // In practice, you'd query the database for all verification records
                 await Task.Delay(100);
-
-                return new List<PoliceVerificationData>
-                {
-                    new PoliceVerificationData
-                    {
-                        NIDNumber = "1990123456789",
-                        IsValid = true,
-                        ValidationMessage = "পরিষ্কার রেকর্ড",
-                        LastVerified = DateTime.Now.ToString("yyyy-MM-dd"),
-                        DangerLevel = "নিম্ন"
-                    },
-                    new PoliceVerificationData
-                    {
-                        NIDNumber = "1991123456789",
-                        IsValid = true,
-                        ValidationMessage = "পরিষ্কার রেকর্ড",
-                        LastVerified = DateTime.Now.ToString("yyyy-MM-dd"),
-                        DangerLevel = "নিম্ন"
-                    }
-                };
+                return new List<PoliceVerificationData>();
             }
             catch (Exception ex)
             {
@@ -703,12 +763,16 @@ namespace ThikanaTenantVerification.Services
             }
         }
 
+        /// <summary>
+        /// Gets police verification data for a specific NID number
+        /// </summary>
+        /// <param name="nidNumber">NID number to verify</param>
+        /// <returns>PoliceVerificationData object</returns>
         public async Task<PoliceVerificationData?> GetPoliceVerificationForNID(string nidNumber)
         {
             try
             {
-                var data = await GetPoliceVerificationData();
-                return data.FirstOrDefault(p => p.NIDNumber == nidNumber);
+                return await _apiMockService.GetPoliceVerificationAsync(nidNumber);
             }
             catch (Exception ex)
             {

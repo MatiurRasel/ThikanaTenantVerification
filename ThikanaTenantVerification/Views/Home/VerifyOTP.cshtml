@@ -1,13 +1,23 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var mobileNumber = ViewBag.MobileNumber?.ToString() ?? "";
+    var nidData = ViewBag.NIDData?.ToString();
+    var step = ViewBag.RegistrationStep?.ToString() ?? "otp";
+    var userId = ViewBag.UserId?.ToString();
+    
+    // Store OTP in ViewBag when moving from OTP step to password step
+    var storedOTP = ViewBag.StoredOTP?.ToString() ?? "123456"; // Default for demo
+}
+<!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OTP যাচাই - ঠিকানা যাচাইকরণ</title>
+    <title>@(step == "otp" ? "OTP যাচাই" : "পাসওয়ার্ড সেট") - ঠিকানা যাচাইকরণ</title>
     <link href="https://fonts.maateen.me/solaiman-lipi/font.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        /* ALL YOUR CSS STYLES REMAIN THE SAME */
         :root {
             --police-blue: #0d2b6c;
             --police-red: #e4002b;
@@ -44,7 +54,7 @@
             min-height: 100vh;
         }
 
-        /* Compact Header */
+        /* Header */
         .police-header {
             background: rgba(13, 43, 108, 0.98);
             backdrop-filter: blur(10px);
@@ -300,6 +310,7 @@
             border: 2px solid #e2e8f0;
             border-radius: var(--radius-sm);
             transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
         }
 
         .otp-digit:focus {
@@ -308,10 +319,21 @@
             outline: none;
         }
 
+        .otp-digit.error {
+            border-color: var(--error-color);
+            background-color: rgba(239, 68, 68, 0.05);
+        }
+
+        .otp-digit.success {
+            border-color: var(--success-color);
+            background-color: rgba(16, 185, 129, 0.05);
+        }
+
         .otp-hint {
             text-align: center;
             color: var(--text-light);
             font-size: 0.9rem;
+            margin-top: 1rem;
         }
 
         /* Timer */
@@ -328,15 +350,20 @@
             font-size: 1.2rem;
         }
 
-        /* Password Section */
-        .password-section {
-            display: none;
-            margin-top: 2rem;
-            animation: fadeIn 0.5s ease;
+        .timer-expired {
+            color: var(--error-color);
+            animation: blink 1s infinite;
         }
 
-        .password-section.show {
-            display: block;
+        @@keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Password Section */
+        .password-section {
+            margin-top: 2rem;
+            animation: fadeIn 0.5s ease;
         }
 
         .section-header {
@@ -385,12 +412,23 @@
             border-radius: var(--radius-sm);
             font-size: 1rem;
             transition: all 0.3s ease;
+            font-family: 'SolaimanLipi', sans-serif;
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--police-blue);
             box-shadow: 0 0 0 3px rgba(13, 43, 108, 0.1);
+        }
+
+        .form-control.error {
+            border-color: var(--error-color);
+            background-color: rgba(239, 68, 68, 0.05);
+        }
+
+        .form-control.success {
+            border-color: var(--success-color);
+            background-color: rgba(16, 185, 129, 0.05);
         }
 
         /* Password Strength */
@@ -409,7 +447,6 @@
         .strength-fill {
             height: 100%;
             width: 0%;
-            background: var(--error-color);
             border-radius: 3px;
             transition: all 0.3s ease;
         }
@@ -446,6 +483,10 @@
             color: var(--success-color);
         }
 
+        .requirement-item.invalid {
+            color: var(--error-color);
+        }
+
         /* Buttons */
         .action-buttons {
             display: flex;
@@ -467,6 +508,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             flex: 1;
+            font-family: 'SolaimanLipi', sans-serif;
         }
 
         .btn-primary {
@@ -475,9 +517,14 @@
             box-shadow: 0 10px 25px rgba(13, 43, 108, 0.3);
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 15px 35px rgba(13, 43, 108, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .btn-secondary {
@@ -497,7 +544,7 @@
             box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
         }
 
-        .btn-success:hover {
+        .btn-success:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
         }
@@ -525,32 +572,32 @@
             color: var(--success-color);
         }
 
-        /* Quick Actions */
-        .quick-actions {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-        }
-
-        .quick-btn {
-            flex: 1;
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            border-radius: var(--radius-sm);
-            padding: 0.75rem;
-            font-size: 0.85rem;
-            color: var(--police-blue);
+        /* Password Toggle */
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-light);
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+            font-size: 1.1rem;
         }
 
-        .quick-btn:hover {
-            background: #e2e8f0;
-            transform: translateY(-1px);
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--white);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @@keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* Footer */
@@ -572,6 +619,16 @@
         @@keyframes slideIn {
             from { opacity: 0; transform: translateX(-20px); }
             to { opacity: 1; transform: translateX(0); }
+        }
+
+        @@keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
         }
 
         /* Responsive */
@@ -642,38 +699,36 @@
             <div class="otp-card">
                 <!-- Progress Steps -->
                 <div class="progress-steps">
-                    <div class="step @(isNewUser ? "completed" : "active")">
+                    <div class="step completed">
                         <div class="step-number">১</div>
-                        <div class="step-label">@(isNewUser ? "NID যাচাই" : "লগইন")</div>
+                        <div class="step-label">NID যাচাই</div>
                     </div>
                     <div class="step-line"></div>
-                    <div class="step active">
+                    <div class="step @(step == "otp" ? "active" : "completed")">
                         <div class="step-number">২</div>
                         <div class="step-label">OTP যাচাই</div>
                     </div>
                     <div class="step-line"></div>
-                    <div class="step @(isNewUser ? "" : "disabled")">
-                        <div class="step-number">৩</div>
-                        <div class="step-label">@(isNewUser ? "পাসওয়ার্ড" : "ড্যাশবোর্ড")</div>
+                    <div class="step completed">
+                        <div class="step-number">✓</div>
+                        <div class="step-label">সম্পন্ন</div>
                     </div>
                 </div>
 
                 <!-- Header -->
                 <div class="otp-header">
                     <div class="otp-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                    </div>
-                    <h2 class="otp-title">OTP যাচাই করুন</h2>
-                    <p class="otp-subtitle">
-                        @if (isNewUser)
+                        @if (step == "otp")
                         {
-                            <span>নতুন ব্যবহারকারী নিবন্ধন</span>
+                            <i class="fas fa-mobile-alt"></i>
                         }
                         else
                         {
-                            <span>অ্যাকাউন্ট লগইন</span>
+                            <i class="fas fa-lock"></i>
                         }
-                    </p>
+                    </div>
+                    <h2 class="otp-title">OTP যাচাই করুন</h2>
+                    <p class="otp-subtitle">নতুন ব্যবহারকারী নিবন্ধন - OTP যাচাই করুন</p>
                 </div>
 
                 <!-- Mobile Info -->
@@ -698,36 +753,37 @@
                     </div>
                 }
 
-                <!-- Demo OTP -->
-                <div class="demo-otp">
-                    <div class="demo-header">
-                        <i class="fas fa-code"></i>
-                        <span>ডেমো OTP কোড</span>
-                    </div>
-                    <div class="demo-code">
-                        <code>123456</code>
-                    </div>
-                    <p class="demo-info">ডেভেলপমেন্টের জন্য এই কোডটি ব্যবহার করুন</p>
-                </div>
+
 
                 <!-- OTP Input Form -->
-                <form method="post" action="@Url.Action("VerifyOTP", "Home")" id="otpForm">
-                    <input type="hidden" name="isNewUser" value="@isNewUser" />
+                <form method="post" action="@Url.Action("VerifyOTP", "Home")" id="otpForm" novalidate>
+                    @Html.AntiForgeryToken()
+                    
+                    <!-- CRITICAL: Store OTP in a hidden field ALWAYS -->
+                    <input type="hidden" name="otp" id="otpValue" value="@storedOTP" />
+                    
+                    <input type="hidden" name="isNewUser" value="@(step == "password" ? "true" : "false")" />
                     @if (userId != null)
                     {
                         <input type="hidden" name="userId" value="@userId" />
                     }
 
+                    <!-- OTP Input Section -->
                     <div class="otp-input-container">
                         <div class="otp-inputs">
-                            <input type="text" class="otp-digit" maxlength="1" pattern="\d" oninput="moveToNext(this, 1)">
-                            <input type="text" class="otp-digit" maxlength="1" pattern="\d" oninput="moveToNext(this, 2)">
-                            <input type="text" class="otp-digit" maxlength="1" pattern="\d" oninput="moveToNext(this, 3)">
-                            <input type="text" class="otp-digit" maxlength="1" pattern="\d" oninput="moveToNext(this, 4)">
-                            <input type="text" class="otp-digit" maxlength="1" pattern="\d" oninput="moveToNext(this, 5)">
-                            <input type="text" class="otp-digit" maxlength="1" pattern="\d" oninput="moveToNext(this, 6)">
+                            <input type="text" class="otp-digit" maxlength="1" pattern="\d" 
+                                   oninput="moveToNext(this, 1)" autocomplete="off" data-index="1">
+                            <input type="text" class="otp-digit" maxlength="1" pattern="\d" 
+                                   oninput="moveToNext(this, 2)" autocomplete="off" data-index="2">
+                            <input type="text" class="otp-digit" maxlength="1" pattern="\d" 
+                                   oninput="moveToNext(this, 3)" autocomplete="off" data-index="3">
+                            <input type="text" class="otp-digit" maxlength="1" pattern="\d" 
+                                   oninput="moveToNext(this, 4)" autocomplete="off" data-index="4">
+                            <input type="text" class="otp-digit" maxlength="1" pattern="\d" 
+                                   oninput="moveToNext(this, 5)" autocomplete="off" data-index="5">
+                            <input type="text" class="otp-digit" maxlength="1" pattern="\d" 
+                                   oninput="moveToNext(this, 6)" autocomplete="off" data-index="6">
                         </div>
-                        <input type="hidden" name="otp" id="otpValue">
                         <p class="otp-hint">ডেমো OTP: <strong>123456</strong></p>
                     </div>
 
@@ -736,90 +792,8 @@
                         OTP কোডটি <span class="timer-value" id="timer">05:00</span> মিনিটের জন্য বৈধ
                     </div>
 
-                    <!-- Password Section (For New Users Only) -->
-                    @if (isNewUser)
-                    {
-                        <div id="passwordSection" class="password-section">
-                            <div class="section-header">
-                                <h3 class="section-title">নিরাপদ পাসওয়ার্ড সেট করুন</h3>
-                                <p class="otp-subtitle">নিচের নির্দেশনা অনুসরণ করুন</p>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">
-                                    <i class="fas fa-lock"></i>
-                                    পাসওয়ার্ড
-                                </label>
-                                <div class="input-group">
-                                    <i class="fas fa-key"></i>
-                                    <input type="password"
-                                           name="password"
-                                           id="password"
-                                           class="form-control"
-                                           placeholder="পাসওয়ার্ড দিন"
-                                           minlength="8"
-                                           required
-                                           oninput="validatePassword()">
-                                </div>
-                                <div class="password-strength">
-                                    <div class="strength-meter">
-                                        <div class="strength-fill" id="strengthFill"></div>
-                                    </div>
-                                    <div class="strength-text" id="strengthText">পাসওয়ার্ড শক্তি</div>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">
-                                    <i class="fas fa-lock"></i>
-                                    পাসওয়ার্ড নিশ্চিত করুন
-                                </label>
-                                <div class="input-group">
-                                    <i class="fas fa-key"></i>
-                                    <input type="password"
-                                           name="confirmPassword"
-                                           id="confirmPassword"
-                                           class="form-control"
-                                           placeholder="পুনরায় পাসওয়ার্ড দিন"
-                                           minlength="8"
-                                           required
-                                           oninput="checkPasswordMatch()">
-                                </div>
-                                <div id="passwordMatch" style="margin-top: 0.5rem; font-size: 0.85rem;">
-                                    <span id="matchText"></span>
-                                </div>
-                            </div>
-
-                            <!-- Password Requirements -->
-                            <div class="password-requirements">
-                                <div style="margin-bottom: 0.75rem; color: var(--police-blue); font-weight: 600;">
-                                    <i class="fas fa-list-check"></i> পাসওয়ার্ডের প্রয়োজনীয়তা
-                                </div>
-                                <div class="requirements-grid">
-                                    <div class="requirement-item" id="req-length">
-                                        <i class="fas fa-circle"></i>
-                                        <span>কমপক্ষে ৮ অক্ষর</span>
-                                    </div>
-                                    <div class="requirement-item" id="req-uppercase">
-                                        <i class="fas fa-circle"></i>
-                                        <span>অন্তত ১টি বড় হাতের অক্ষর</span>
-                                    </div>
-                                    <div class="requirement-item" id="req-lowercase">
-                                        <i class="fas fa-circle"></i>
-                                        <span>অন্তত ১টি ছোট হাতের অক্ষর</span>
-                                    </div>
-                                    <div class="requirement-item" id="req-number">
-                                        <i class="fas fa-circle"></i>
-                                        <span>অন্তত ১টি সংখ্যা</span>
-                                    </div>
-                                    <div class="requirement-item" id="req-special">
-                                        <i class="fas fa-circle"></i>
-                                        <span>অন্তত ১টি বিশেষ অক্ষর</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
+                    <!-- NO PASSWORD STEP - OTP-based authentication only -->
+                    <!-- User can optionally set password later from profile settings -->
 
                     <!-- Action Buttons -->
                     <div class="action-buttons">
@@ -828,45 +802,12 @@
                             ফিরে যান
                         </a>
                         
-                        @if (isNewUser)
-                        {
-                            <button type="button" id="nextBtn" class="btn btn-primary" onclick="showPasswordSection()">
-                                <i class="fas fa-arrow-right"></i>
-                                পরবর্তী
-                            </button>
-                            <button type="submit" id="submitBtn" class="btn btn-success" style="display: none;">
-                                <i class="fas fa-user-plus"></i>
-                                রেজিস্ট্রেশন সম্পূর্ণ করুন
-                            </button>
-                        }
-                        else
-                        {
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-check-circle"></i>
-                                যাচাই করুন
-                            </button>
-                        }
+                        <button type="submit" id="verifyBtn" class="btn btn-primary">
+                            <i class="fas fa-check-circle"></i>
+                            OTP যাচাই করুন
+                        </button>
                     </div>
                 </form>
-
-                <!-- Quick Actions -->
-                <div class="quick-actions">
-                    <button type="button" class="quick-btn" onclick="fillDemoOTP()">
-                        <i class="fas fa-magic"></i>
-                        ডেমো OTP বসান
-                    </button>
-                    <button type="button" class="quick-btn" onclick="autoSubmit()">
-                        <i class="fas fa-bolt"></i>
-                        অটো যাচাই
-                    </button>
-                    @if (isNewUser)
-                    {
-                        <button type="button" class="quick-btn" onclick="generatePassword()">
-                            <i class="fas fa-dice"></i>
-                            পাসওয়ার্ড জেনারেট করুন
-                        </button>
-                    }
-                </div>
             </div>
         </div>
     </main>
@@ -879,53 +820,133 @@
     </footer>
 
     <script>
+        // Global variables
         let timeLeft = 300; // 5 minutes
         let timerInterval = null;
+        let isFormSubmitting = false;
 
-        // Initialize OTP inputs
+        // Initialize based on step
         document.addEventListener('DOMContentLoaded', function() {
-            // Focus first OTP input
-            document.querySelector('.otp-digit').focus();
+            // Auto-fill demo OTP for testing
+            setTimeout(() => {
+                fillDemoOTP();
+            }, 100);
             
             // Start timer
             startTimer();
             
-            // Update OTP value on input
-            updateOTPValue();
+            // Auto-focus first OTP input
+            setTimeout(() => {
+                const firstInput = document.querySelector('.otp-digit[data-index="1"]');
+                if (firstInput) firstInput.focus();
+            }, 150);
+            
+            // Prevent form resubmission
+            preventFormResubmission();
+            
+            // Add form validation
+            setupFormValidation();
         });
 
-        // Move to next input
+        // Password functions removed - OTP-only authentication
+
+        // Setup form validation
+        function setupFormValidation() {
+            const form = document.getElementById('otpForm');
+            if (!form) return;
+            
+            form.addEventListener('submit', function(e) {
+                if (!validateOTP()) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Show loading state
+                const submitBtn = document.getElementById('verifyBtn');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<div class="spinner"></div> প্রক্রিয়াকরণ হচ্ছে...';
+                }
+                
+                isFormSubmitting = true;
+                return true;
+            });
+        }
+
+        // Validate OTP
+        function validateOTP() {
+            const otpValueField = document.getElementById('otpValue');
+            const otp = otpValueField ? otpValueField.value : '';
+            const otpInputs = document.querySelectorAll('.otp-digit');
+            
+            if (!otp || otp.length !== 6) {
+                showMessage('অনুগ্রহ করে ৬ ডিজিটের OTP দিন', 'error');
+                
+                // Highlight empty fields
+                otpInputs.forEach(input => {
+                    if (!input.value) {
+                        input.classList.add('error');
+                        input.classList.remove('success');
+                    }
+                });
+                
+                // Focus first empty field
+                for (let input of otpInputs) {
+                    if (!input.value) {
+                        input.focus();
+                        break;
+                    }
+                }
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Password validation removed - OTP-only authentication
+
+        // Move to next OTP input
         function moveToNext(input, index) {
+            // Allow only digits
+            input.value = input.value.replace(/\D/g, '');
+            
+            // Remove error/success classes
+            input.classList.remove('error', 'success');
+            
             if (input.value.length === 1) {
                 const inputs = document.querySelectorAll('.otp-digit');
                 if (index < inputs.length) {
                     inputs[index].focus();
                 }
             }
+            
             updateOTPValue();
-            
-            // Auto-submit if 6 digits entered and not new user
-            const otp = document.getElementById('otpValue').value;
-            const isNewUser = document.querySelector('input[name="isNewUser"]').value === 'True';
-            
-            if (otp.length === 6 && !isNewUser) {
-                setTimeout(() => {
-                    document.getElementById('otpForm').submit();
-                }, 500);
-            }
         }
 
-        // Update OTP value
+        // Update OTP value in hidden field
         function updateOTPValue() {
             const inputs = document.querySelectorAll('.otp-digit');
             let otp = '';
             inputs.forEach(input => {
                 otp += input.value;
             });
-            document.getElementById('otpValue').value = otp;
+            
+            const otpValueField = document.getElementById('otpValue');
+            if (otpValueField) {
+                otpValueField.value = otp;
+            }
+            
+            // Visual feedback
+            inputs.forEach(input => {
+                if (input.value) {
+                    input.classList.add('success');
+                } else {
+                    input.classList.remove('success');
+                }
+            });
         }
 
-        // Fill demo OTP
+        // Fill demo OTP (for testing)
         function fillDemoOTP() {
             const inputs = document.querySelectorAll('.otp-digit');
             const demoOTP = '123456';
@@ -933,25 +954,21 @@
             inputs.forEach((input, index) => {
                 if (index < demoOTP.length) {
                     input.value = demoOTP[index];
-                    input.dispatchEvent(new Event('input'));
+                    input.classList.add('success');
+                    // Dispatch input event to trigger updateOTPValue
+                    const event = new Event('input', { bubbles: true });
+                    input.dispatchEvent(event);
                 }
-            });
-            
-            // Show success animation
-            inputs.forEach(input => {
-                input.style.borderColor = '#10b981';
-                input.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
-                
-                setTimeout(() => {
-                    input.style.borderColor = '';
-                    input.style.boxShadow = '';
-                }, 1000);
             });
         }
 
-        // Start timer
+        // Password fill function removed - OTP-only authentication
+
+        // Start OTP timer
         function startTimer() {
             const timerElement = document.getElementById('timer');
+            
+            if (!timerElement) return;
             
             timerInterval = setInterval(() => {
                 const minutes = Math.floor(timeLeft / 60);
@@ -962,160 +979,29 @@
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     timerElement.textContent = '00:00';
-                    timerElement.style.color = '#ef4444';
+                    timerElement.classList.add('timer-expired');
+                    
+                    // Disable verify button
+                    const verifyBtn = document.getElementById('verifyBtn');
+                    if (verifyBtn) {
+                        verifyBtn.disabled = true;
+                        verifyBtn.innerHTML = '<i class="fas fa-clock"></i> OTP এর মেয়াদ শেষ';
+                    }
                 } else {
                     timeLeft--;
                 }
             }, 1000);
         }
 
-        // Show password section for new users
-        function showPasswordSection() {
-            const otp = document.getElementById('otpValue').value;
-            const isNewUser = document.querySelector('input[name="isNewUser"]').value === 'True';
-            
-            if (!isNewUser) return;
-            
-            if (otp.length !== 6) {
-                showMessage('অনুগ্রহ করে ৬ ডিজিটের OTP দিন', 'error');
-                return;
-            }
-            
-            const passwordSection = document.getElementById('passwordSection');
-            const nextBtn = document.getElementById('nextBtn');
-            const submitBtn = document.getElementById('submitBtn');
-            
-            // Show password section
-            passwordSection.classList.add('show');
-            passwordSection.style.display = 'block';
-            
-            // Switch buttons
-            nextBtn.style.display = 'none';
-            submitBtn.style.display = 'flex';
-            
-            // Focus on password field
-            setTimeout(() => {
-                document.getElementById('password').focus();
-            }, 100);
-        }
-
-        // Auto submit
-        function autoSubmit() {
-            fillDemoOTP();
-            
-            const isNewUser = document.querySelector('input[name="isNewUser"]').value === 'True';
-            
-            if (isNewUser) {
-                setTimeout(() => {
-                    showPasswordSection();
-                    generatePassword();
-                }, 500);
-            } else {
-                setTimeout(() => {
-                    document.getElementById('otpForm').submit();
-                }, 500);
-            }
-        }
-
-        // Generate password
-        function generatePassword() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@@#$%^&*';
-            let password = '';
-            
-            // Ensure requirements
-            password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
-            password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
-            password += '0123456789'[Math.floor(Math.random() * 10)];
-            password += '!@@#$%^&*'[Math.floor(Math.random() * 8)];
-            
-            // Add remaining
-            for (let i = 0; i < 4; i++) {
-                password += chars[Math.floor(Math.random() * chars.length)];
-            }
-            
-            // Shuffle
-            password = password.split('').sort(() => Math.random() - 0.5).join('');
-            
-            // Set values
-            document.getElementById('password').value = password;
-            document.getElementById('confirmPassword').value = password;
-            
-            // Trigger validation
-            validatePassword();
-            checkPasswordMatch();
-            
-            showMessage('পাসওয়ার্ড জেনারেট করা হয়েছে!', 'success');
-        }
-
-        // Validate password
-        function validatePassword() {
-            const password = document.getElementById('password').value;
-            
-            const requirements = {
-                length: password.length >= 8,
-                uppercase: /[A-Z]/.test(password),
-                lowercase: /[a-z]/.test(password),
-                number: /[0-9]/.test(password),
-                special: /[!@@#$%^&*]/.test(password)
-            };
-            
-            // Update indicators
-            Object.keys(requirements).forEach(key => {
-                const element = document.getElementById(`req-${key}`);
-                if (requirements[key]) {
-                    element.classList.add('valid');
-                    element.innerHTML = '<i class="fas fa-check-circle"></i> ' + element.textContent;
-                } else {
-                    element.classList.remove('valid');
-                    element.innerHTML = '<i class="fas fa-circle"></i> ' + element.textContent;
-                }
-            });
-            
-            // Update strength meter
-            let strength = 0;
-            Object.values(requirements).forEach(isMet => {
-                if (isMet) strength += 20;
-            });
-            
-            const strengthFill = document.getElementById('strengthFill');
-            const strengthText = document.getElementById('strengthText');
-            
-            strengthFill.style.width = strength + '%';
-            
-            if (strength < 40) {
-                strengthFill.style.background = '#ef4444';
-                strengthText.textContent = 'দুর্বল পাসওয়ার্ড';
-                strengthText.style.color = '#ef4444';
-            } else if (strength < 80) {
-                strengthFill.style.background = '#f59e0b';
-                strengthText.textContent = 'মাঝারি পাসওয়ার্ড';
-                strengthText.style.color = '#f59e0b';
-            } else {
-                strengthFill.style.background = '#10b981';
-                strengthText.textContent = 'শক্তিশালী পাসওয়ার্ড';
-                strengthText.style.color = '#10b981';
-            }
-        }
-
-        // Check password match
-        function checkPasswordMatch() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const matchDiv = document.getElementById('matchText');
-            
-            if (password && confirmPassword) {
-                if (password === confirmPassword) {
-                    matchDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #10b981;"></i> পাসওয়ার্ড মিলেছে';
-                } else {
-                    matchDiv.innerHTML = '<i class="fas fa-times-circle" style="color: #ef4444;"></i> পাসওয়ার্ড মিলছে না';
-                }
-            } else {
-                matchDiv.innerHTML = '';
-            }
-        }
+        // Password validation functions removed - OTP-only authentication
 
         // Show message
         function showMessage(message, type) {
+            // Remove existing alerts (except server errors)
+            const existingAlerts = document.querySelectorAll('.alert:not(.alert-danger):not(.alert-success)');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Create new alert
             const alertDiv = document.createElement('div');
             alertDiv.className = `alert alert-${type === 'error' ? 'danger' : 'success'}`;
             alertDiv.innerHTML = `
@@ -1123,65 +1009,26 @@
                 ${message}
             `;
             
-            const form = document.getElementById('otpForm');
-            form.insertBefore(alertDiv, form.firstChild);
+            // Insert after header
+            const header = document.querySelector('.otp-header');
+            if (header && header.parentNode) {
+                header.parentNode.insertBefore(alertDiv, header.nextSibling);
+            }
             
+            // Auto remove after 5 seconds
             setTimeout(() => {
-                alertDiv.remove();
-            }, 3000);
+                if (alertDiv.parentNode && !alertDiv.classList.contains('alert-danger') && !alertDiv.classList.contains('alert-success')) {
+                    alertDiv.remove();
+                }
+            }, 5000);
         }
 
-        // Form validation
-        document.getElementById('otpForm').addEventListener('submit', function(e) {
-            const isNewUser = document.querySelector('input[name="isNewUser"]').value === 'True';
-            const otp = document.getElementById('otpValue').value;
-            
-            // Always validate OTP
-            if (otp.length !== 6) {
-                e.preventDefault();
-                showMessage('অনুগ্রহ করে ৬ ডিজিটের OTP দিন', 'error');
-                return;
+        // Prevent form resubmission
+        function preventFormResubmission() {
+            if (window.history.replaceState) {
+                window.history.replaceState(null, null, window.location.href);
             }
-            
-            if (isNewUser) {
-                const passwordSection = document.getElementById('passwordSection');
-                
-                // If password section is hidden, show it and prevent submit
-                if (!passwordSection.classList.contains('show')) {
-                    e.preventDefault();
-                    showPasswordSection();
-                    return;
-                }
-                
-                // Validate passwords
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
-                
-                if (password.length < 8) {
-                    e.preventDefault();
-                    showMessage('পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে', 'error');
-                    return;
-                }
-                
-                if (password !== confirmPassword) {
-                    e.preventDefault();
-                    showMessage('পাসওয়ার্ড মিলছে না', 'error');
-                    return;
-                }
-                
-                // Check requirements
-                const hasUppercase = /[A-Z]/.test(password);
-                const hasLowercase = /[a-z]/.test(password);
-                const hasNumber = /[0-9]/.test(password);
-                const hasSpecial = /[!@@#$%^&*]/.test(password);
-                
-                if (!hasUppercase || !hasLowercase || !hasNumber || !hasSpecial) {
-                    e.preventDefault();
-                    showMessage('পাসওয়ার্ড প্রয়োজনীয়তা পূরণ হয়নি', 'error');
-                    return;
-                }
-            }
-        });
+        }
     </script>
 </body>
 </html>

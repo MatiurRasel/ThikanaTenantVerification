@@ -1,369 +1,526 @@
-﻿@model ThikanaTenantVerification.Models.User
+@model ThikanaTenantVerification.Models.User
 @{
     ViewData["Title"] = "ড্যাশবোর্ড";
-    Layout = "_Layout";
+    Layout = null; // Full page layout
+    var completionPercentage = ViewBag.CompletionPercentage ?? Model.CompletionPercentage;
+    var canDownload = completionPercentage >= 90;
 }
 
-@section Styles {
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ড্যাশবোর্ড - ঠিকানা যাচাইকরণ</title>
+    <link href="https://fonts.maateen.me/solaiman-lipi/font.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-            background: var(--bg-secondary);
+        :root {
+            --police-blue: #0d2b6c;
+            --police-red: #e4002b;
+            --police-gold: #ffc107;
+            --police-light-blue: #1e88e5;
+            --dark-bg: #0a1a36;
+            --light-bg: #f0f4f8;
+            --white: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --gradient-blue: linear-gradient(135deg, #0d2b6c 0%, #1e3a8a 100%);
+            --gradient-gold: linear-gradient(135deg, #ffc107 0%, #ffd54f 100%);
+            --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.3);
+            --shadow-light: 0 8px 30px rgba(0, 0, 0, 0.1);
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
         }
 
-        .sidebar {
-            width: 280px;
-            background: var(--bg-primary);
-            border-right: 1px solid #e2e8f0;
-            box-shadow: var(--shadow-md);
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans Bengali', 'SolaimanLipi', 'Inter', sans-serif;
+            background: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .dashboard-header {
+            background: var(--gradient-blue);
+            color: var(--white);
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow-light);
+            position: sticky;
+            top: 0;
             z-index: 1000;
         }
 
-        .sidebar-header {
-            padding: var(--space-lg);
-            border-bottom: 1px solid #e2e8f0;
-            background: var(--primary-gradient);
-            color: white;
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .user-profile {
+        .header-left {
             display: flex;
             align-items: center;
-            gap: var(--space-sm);
+            gap: 1.5rem;
         }
 
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            background: var(--accent-gradient);
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: var(--white);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-            font-weight: bold;
+            border: 2px solid var(--police-gold);
         }
 
-        .user-info h3 {
-            margin: 0;
-            font-size: 1rem;
-            color: white;
+        .logo-icon i {
+            color: var(--police-blue);
+            font-size: 1.4rem;
         }
 
-        .user-info p {
+        .logo-text h1 {
+            font-size: 1.3rem;
             margin: 0;
-            font-size: 0.875rem;
+            color: var(--white);
+        }
+
+        .logo-text p {
+            font-size: 0.85rem;
             opacity: 0.9;
+            margin: 0;
         }
 
-        .main-content {
-            flex: 1;
-            margin-left: 280px;
-            padding: var(--space-lg);
-        }
-
-        .content-header {
-            background: white;
-            padding: var(--space-lg);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-md);
-            margin-bottom: var(--space-lg);
+        .user-menu {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 1rem;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: var(--space-md);
-            margin-bottom: var(--space-lg);
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--police-blue);
         }
 
-        .stat-card {
-            background: white;
-            padding: var(--space-lg);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-md);
-            border-top: 4px solid;
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Noto Sans Bengali', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--police-red);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(228, 0, 43, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(228, 0, 43, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Main Content */
+        .dashboard-main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Progress Card */
+        .progress-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-light);
+            margin-bottom: 2rem;
             position: relative;
             overflow: hidden;
         }
 
-            .stat-card::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 4px;
-                background: inherit;
-            }
-
-            .stat-card.primary {
-                border-color: var(--primary);
-            }
-
-            .stat-card.success {
-                border-color: var(--success);
-            }
-
-            .stat-card.warning {
-                border-color: var(--warning);
-            }
-
-            .stat-card.danger {
-                border-color: var(--danger);
-            }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--border-radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: var(--space-md);
+        .progress-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--gradient-blue);
         }
 
-        .stat-card.primary .stat-icon {
-            background: rgba(26, 35, 126, 0.1);
-            color: var(--primary);
-        }
-
-        .stat-card.success .stat-icon {
-            background: rgba(0, 200, 83, 0.1);
-            color: var(--success);
-        }
-
-        .stat-card.warning .stat-icon {
-            background: rgba(255, 171, 0, 0.1);
-            color: var(--warning);
-        }
-
-        .stat-card.danger .stat-icon {
-            background: rgba(255, 23, 68, 0.1);
-            color: var(--danger);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: var(--space-xs);
-        }
-
-        .stat-title {
-            color: var(--text-light);
-            font-size: 0.875rem;
-        }
-
-        .progress-section {
-            background: white;
-            padding: var(--space-lg);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-md);
-            margin-bottom: var(--space-lg);
-        }
-
-        .completion-stats {
+        .progress-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: var(--space-md);
+            margin-bottom: 1.5rem;
         }
 
+        .progress-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--police-blue);
+        }
+
+        .progress-percentage {
+            font-size: 3rem;
+            font-weight: 900;
+            background: var(--gradient-blue);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .progress-bar-container {
+            background: #e2e8f0;
+            border-radius: 50px;
+            height: 20px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--gradient-blue);
+            border-radius: 50px;
+            transition: width 1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @@keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .progress-stat {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(13, 43, 108, 0.05);
+            border-radius: var(--radius-sm);
+        }
+
+        .progress-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--police-blue);
+        }
+
+        .progress-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        /* Sections Grid */
         .sections-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: var(--space-md);
-            margin-top: var(--space-lg);
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
         }
 
         .section-card {
-            background: white;
-            border-radius: var(--border-radius-lg);
-            padding: var(--space-lg);
-            box-shadow: var(--shadow-md);
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-light);
             border: 1px solid #e2e8f0;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-            .section-card:hover {
-                transform: translateY(-5px);
-                box-shadow: var(--shadow-lg);
-                border-color: var(--primary-light);
-            }
+        .section-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-blue);
+        }
 
-        .section-header {
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-strong);
+            border-color: var(--police-light-blue);
+        }
+
+        .section-card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: var(--space-md);
+            margin-bottom: 1.5rem;
         }
 
         .section-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--primary-gradient);
-            border-radius: var(--border-radius-md);
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-blue);
+            border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 1.25rem;
+            color: var(--white);
+            font-size: 1.5rem;
         }
 
         .section-status {
-            padding: 0.25rem 0.75rem;
+            padding: 0.5rem 1rem;
             border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 500;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
 
         .status-complete {
-            background: rgba(0, 200, 83, 0.1);
-            color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
         }
 
         .status-incomplete {
-            background: rgba(255, 171, 0, 0.1);
-            color: var(--warning);
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--police-blue);
+            margin-bottom: 1rem;
+        }
+
+        .section-content {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            min-height: 80px;
         }
 
         .section-list {
             list-style: none;
-            margin: var(--space-md) 0;
         }
 
-            .section-list li {
-                padding: 0.5rem 0;
-                border-bottom: 1px solid #e2e8f0;
-                display: flex;
-                justify-content: space-between;
+        .section-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .section-list li:last-child {
+            border-bottom: none;
+        }
+
+        .section-list li span:first-child {
+            color: var(--text-light);
+        }
+
+        .section-list li strong {
+            color: var(--police-blue);
+        }
+
+        .section-action {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        /* Download Button */
+        .download-section {
+            background: var(--gradient-blue);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            text-align: center;
+            color: var(--white);
+            margin-top: 2rem;
+            box-shadow: var(--shadow-light);
+        }
+
+        .download-section.disabled {
+            background: #94a3b8;
+            opacity: 0.7;
+        }
+
+        .download-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .download-description {
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-download {
+            background: var(--police-gold);
+            color: var(--police-blue);
+            font-weight: 700;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+
+        .btn-download:hover {
+            background: #ffd54f;
+            transform: translateY(-2px);
+        }
+
+        .btn-download:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .dashboard-main {
+                padding: 1rem;
             }
 
-                .section-list li:last-child {
-                    border-bottom: none;
-                }
-    </style>
-}
+            .sections-grid {
+                grid-template-columns: 1fr;
+            }
 
-<div class="dashboard-container">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="user-profile">
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .progress-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-container">
+            <div class="header-left">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>ঠিকানা যাচাইকরণ</h1>
+                        <p>ড্যাশবোর্ড</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="user-menu">
                 <div class="user-avatar">
                     @Model.FullNameBN[0]
                 </div>
-                <div class="user-info">
-                    <h3>@Model.FullNameBN</h3>
-                    <p>ভাড়াটিয়া যাচাইকরণ</p>
+                <div>
+                    <div style="font-weight: 600;">@Model.FullNameBN</div>
+                    <div style="font-size: 0.85rem; opacity: 0.9;">@Model.MobileNumber</div>
                 </div>
             </div>
-        </div>
 
-        <nav class="sidebar-nav">
-            <a href="#" class="nav-item active">
-                <i class="fas fa-tachometer-alt"></i>
-                <span>ড্যাশবোর্ড</span>
-            </a>
-            <a href="@Url.Action("CurrentResidence", "Home", new { userId = Model.Id })" class="nav-item">
-                <i class="fas fa-home"></i>
-                <span>বর্তমান ঠিকানা</span>
-            </a>
-            <a href="@Url.Action("EmergencyContact", "Home", new { userId = Model.Id })" class="nav-item">
-                <i class="fas fa-phone-alt"></i>
-                <span>জরুরী যোগাযোগ</span>
-            </a>
-            <a href="@Url.Action("FamilyMembers", "Home", new { userId = Model.Id })" class="nav-item">
-                <i class="fas fa-users"></i>
-                <span>পরিবারের সদস্য</span>
-            </a>
-            <a href="@Url.Action("HouseWorkers", "Home", new { userId = Model.Id })" class="nav-item">
-                <i class="fas fa-briefcase"></i>
-                <span>গৃহকর্মী/ড্রাইভার</span>
-            </a>
-            <a href="@Url.Action("CurrentLandlord", "Home")" class="nav-item">
-                <i class="fas fa-user-tie"></i>
-                <span>বাড়িওয়ালার তথ্য</span>
-            </a>
-            <div class="sidebar-footer" style="padding: var(--space-lg); margin-top: auto;">
-                <a href="@Url.Action("Index", "Home")" class="btn btn-outline btn-full">
+            <div class="header-actions">
+                <a href="@Url.Action("Logout", "Home")" class="btn btn-secondary">
                     <i class="fas fa-sign-out-alt"></i>
                     লগআউট
                 </a>
             </div>
-        </nav>
-    </aside>
+        </div>
+    </header>
 
     <!-- Main Content -->
-    <main class="main-content">
-        <header class="content-header">
-            <div>
-                <h1>ড্যাশবোর্ড ওভারভিউ</h1>
-                <p>আপনার ভাড়াটিয়া যাচাইকরণ প্রক্রিয়ার সাম্প্রতিক অবস্থা</p>
-            </div>
-            <div>
-                <button class="btn btn-primary">
-                    <i class="fas fa-download"></i>
-                    রিপোর্ট ডাউনলোড
-                </button>
-            </div>
-        </header>
-
-        <!-- Stats Grid -->
-        <div class="stats-grid">
-            <div class="stat-card primary">
-                <div class="stat-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stat-number">@(ViewBag.CompletionPercentage ?? 0)%</div>
-                <div class="stat-title">প্রক্রিয়া সম্পূর্ণতা</div>
+    <main class="dashboard-main">
+        <!-- Progress Card -->
+        <div class="progress-card">
+            <div class="progress-header">
+                <h2 class="progress-title">যাচাইকরণ প্রক্রিয়া</h2>
+                <div class="progress-percentage">@completionPercentage%</div>
             </div>
 
-            <div class="stat-card success">
-                <div class="stat-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-number">@(Model.FamilyMembers?.Count ?? 0)</div>
-                <div class="stat-title">পরিবারের সদস্য</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: @completionPercentage%"></div>
             </div>
 
-            <div class="stat-card warning">
-                <div class="stat-icon">
-                    <i class="fas fa-briefcase"></i>
+            <div class="progress-stats">
+                <div class="progress-stat">
+                    <div class="progress-stat-value">@(Model.EmergencyContacts?.Count ?? 0)</div>
+                    <div class="progress-stat-label">জরুরী যোগাযোগ</div>
                 </div>
-                <div class="stat-number">@(Model.HouseWorkers?.Count ?? 0)</div>
-                <div class="stat-title">গৃহকর্মী</div>
-            </div>
-
-            <div class="stat-card danger">
-                <div class="stat-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
+                <div class="progress-stat">
+                    <div class="progress-stat-value">@(Model.FamilyMembers?.Count ?? 0)</div>
+                    <div class="progress-stat-label">পরিবারের সদস্য</div>
                 </div>
-                <div class="stat-number">@(Model.EmergencyContacts?.Count ?? 0)</div>
-                <div class="stat-title">জরুরী যোগাযোগ</div>
-            </div>
-        </div>
-
-        <!-- Progress Section -->
-        <div class="progress-section">
-            <h3>যাচাইকরণ প্রক্রিয়া</h3>
-            <div class="progress-container">
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: @(ViewBag.CompletionPercentage ?? 0)%"></div>
+                <div class="progress-stat">
+                    <div class="progress-stat-value">@(Model.HouseWorkers?.Count ?? 0)</div>
+                    <div class="progress-stat-label">গৃহকর্মী</div>
                 </div>
-            </div>
-            <div class="completion-stats">
-                <span class="text-muted">প্রক্রিয়া চলছে</span>
-                <span class="text-primary font-bold">@(ViewBag.CompletionPercentage ?? 0)% সম্পূর্ণ</span>
+                <div class="progress-stat">
+                    <div class="progress-stat-value">@(Model.DocumentAttachments?.Count ?? 0)</div>
+                    <div class="progress-stat-label">ডকুমেন্ট</div>
+                </div>
             </div>
         </div>
 
@@ -371,113 +528,251 @@
         <div class="sections-grid">
             <!-- Personal Information -->
             <div class="section-card">
-                <div class="section-header">
+                <div class="section-card-header">
                     <div class="section-icon">
                         <i class="fas fa-user"></i>
                     </div>
-                    <div class="section-status status-complete">
-                        সম্পূর্ণ
-                    </div>
+                    <span class="section-status status-complete">সম্পূর্ণ</span>
                 </div>
-                <h4>ব্যক্তিগত তথ্য</h4>
-                <ul class="section-list">
-                    <li><span>নাম:</span> <strong>@Model.FullNameBN</strong></li>
-                    <li><span>পিতা:</span> @Model.FatherNameBN</li>
-                    <li><span>মোবাইল:</span> @Model.MobileNumber</li>
-                    <li><span>এনআইডি:</span> @Model.NIDNumber</li>
-                </ul>
-                <a href="#" class="btn btn-outline btn-sm">
-                    <i class="fas fa-edit"></i>
-                    সম্পাদনা
-                </a>
+                <h3 class="section-title">ব্যক্তিগত তথ্য</h3>
+                <div class="section-content">
+                    <ul class="section-list">
+                        <li><span>নাম:</span> <strong>@Model.FullNameBN</strong></li>
+                        <li><span>পিতার নাম:</span> @Model.FatherNameBN</li>
+                        <li><span>মোবাইল:</span> @Model.MobileNumber</li>
+                        <li><span>এনআইডি:</span> @Model.NIDNumber</li>
+                        <li><span>জন্ম তারিখ:</span> @Model.DateOfBirth.ToString("dd-MM-yyyy")</li>
+                    </ul>
+                </div>
             </div>
 
             <!-- Current Residence -->
             <div class="section-card">
-                <div class="section-header">
+                <div class="section-card-header">
                     <div class="section-icon">
                         <i class="fas fa-home"></i>
                     </div>
-                    <div class="section-status @(Model.CurrentResidence != null ? "status-complete" : "status-incomplete")">
+                    <span class="section-status @(Model.CurrentResidence != null ? "status-complete" : "status-incomplete")">
                         @(Model.CurrentResidence != null ? "সম্পূর্ণ" : "অসম্পূর্ণ")
-                    </div>
+                    </span>
                 </div>
-                <h4>বর্তমান ঠিকানা</h4>
-                @if (Model.CurrentResidence != null)
-                {
-                    <ul class="section-list">
-                        <li><span>বাড়ি:</span> @Model.CurrentResidence.HouseHolding</li>
-                        <li><span>এলাকা:</span> @Model.CurrentResidence.Area</li>
-                        <li><span>থানা:</span> @Model.CurrentResidence.Thana</li>
-                        <li><span>জেলা:</span> @Model.CurrentResidence.District</li>
-                    </ul>
-                }
-                else
-                {
-                    <p class="text-muted">বর্তমান ঠিকানা যোগ করা হয়নি</p>
-                }
-                <a href="@Url.Action("CurrentResidence", "Home", new { userId = Model.Id })"
-                   class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus"></i>
+                <h3 class="section-title">বর্তমান ঠিকানা</h3>
+                <div class="section-content">
+                    @if (Model.CurrentResidence != null)
+                    {
+                        <ul class="section-list">
+                            <li><span>বাড়ি/হোল্ডিং:</span> <strong>@Model.CurrentResidence.HouseHolding</strong></li>
+                            <li><span>রোড:</span> @Model.CurrentResidence.Road</li>
+                            <li><span>এলাকা:</span> @Model.CurrentResidence.Area</li>
+                            <li><span>থানা:</span> @Model.CurrentResidence.Thana</li>
+                            <li><span>জেলা:</span> @Model.CurrentResidence.District</li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <p style="color: var(--text-light);">বর্তমান ঠিকানা যোগ করা হয়নি</p>
+                    }
+                </div>
+                <a href="@Url.Action("CurrentResidence", "Home")" class="btn btn-primary section-action">
+                    <i class="fas fa-@(Model.CurrentResidence != null ? "edit" : "plus")"></i>
                     @(Model.CurrentResidence != null ? "সম্পাদনা" : "যোগ করুন")
                 </a>
             </div>
 
             <!-- Emergency Contacts -->
             <div class="section-card">
-                <div class="section-header">
+                <div class="section-card-header">
                     <div class="section-icon">
                         <i class="fas fa-phone-alt"></i>
                     </div>
-                    <div class="section-status @(Model.EmergencyContacts?.Any() == true ? "status-complete" : "status-incomplete")">
+                    <span class="section-status @(Model.EmergencyContacts?.Any() == true ? "status-complete" : "status-incomplete")">
                         @(Model.EmergencyContacts?.Any() == true ? "সম্পূর্ণ" : "অসম্পূর্ণ")
-                    </div>
+                    </span>
                 </div>
-                <h4>জরুরী যোগাযোগ</h4>
-                @if (Model.EmergencyContacts?.Any() == true)
-                {
-                    <ul class="section-list">
-                        @foreach (var contact in Model.EmergencyContacts.Take(3))
-                        {
-                            <li><span>@contact.NameBN</span> <small>@contact.Relationship</small></li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p class="text-muted">কোন জরুরী যোগাযোগ যোগ করা হয়নি</p>
-                }
-                <a href="@Url.Action("EmergencyContact", "Home", new { userId = Model.Id })"
-                   class="btn btn-primary btn-sm">
+                <h3 class="section-title">জরুরী যোগাযোগ</h3>
+                <div class="section-content">
+                    @if (Model.EmergencyContacts?.Any() == true)
+                    {
+                        <ul class="section-list">
+                            @foreach (var contact in Model.EmergencyContacts.Take(3))
+                            {
+                                <li>
+                                    <span>@contact.NameBN</span>
+                                    <strong>@contact.MobileNumber</strong>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p style="color: var(--text-light);">কোন জরুরী যোগাযোগ যোগ করা হয়নি</p>
+                    }
+                </div>
+                <a href="@Url.Action("EmergencyContact", "Home")" class="btn btn-primary section-action">
                     <i class="fas fa-plus"></i>
                     যোগ করুন
                 </a>
             </div>
+
+            <!-- Family Members -->
+            <div class="section-card">
+                <div class="section-card-header">
+                    <div class="section-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <span class="section-status @(Model.FamilyMembers?.Any() == true ? "status-complete" : "status-incomplete")">
+                        @(Model.FamilyMembers?.Any() == true ? "সম্পূর্ণ" : "অসম্পূর্ণ")
+                    </span>
+                </div>
+                <h3 class="section-title">পরিবারের সদস্য</h3>
+                <div class="section-content">
+                    @if (Model.FamilyMembers?.Any() == true)
+                    {
+                        <ul class="section-list">
+                            @foreach (var member in Model.FamilyMembers.Take(3))
+                            {
+                                <li>
+                                    <span>@member.NameBN (@member.Relationship)</span>
+                                    <strong>@member.Age বছর</strong>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p style="color: var(--text-light);">কোন পরিবারের সদস্য যোগ করা হয়নি</p>
+                    }
+                </div>
+                <a href="@Url.Action("FamilyMembers", "Home")" class="btn btn-primary section-action">
+                    <i class="fas fa-plus"></i>
+                    যোগ করুন
+                </a>
+            </div>
+
+            <!-- House Workers -->
+            <div class="section-card">
+                <div class="section-card-header">
+                    <div class="section-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <span class="section-status @(Model.HouseWorkers?.Any() == true ? "status-complete" : "status-incomplete")">
+                        @(Model.HouseWorkers?.Any() == true ? "সম্পূর্ণ" : "অসম্পূর্ণ")
+                    </span>
+                </div>
+                <h3 class="section-title">গৃহকর্মী/ড্রাইভার</h3>
+                <div class="section-content">
+                    @if (Model.HouseWorkers?.Any() == true)
+                    {
+                        <ul class="section-list">
+                            @foreach (var worker in Model.HouseWorkers.Take(3))
+                            {
+                                <li>
+                                    <span>@worker.NameBN (@worker.WorkerType)</span>
+                                    @if (worker.IsDangerFlag)
+                                    {
+                                        <strong style="color: var(--error-color);">
+                                            <i class="fas fa-exclamation-triangle"></i> ঝুঁকি
+                                        </strong>
+                                    }
+                                    else
+                                    {
+                                        <strong style="color: var(--success-color);">
+                                            <i class="fas fa-check-circle"></i> নিরাপদ
+                                        </strong>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p style="color: var(--text-light);">কোন গৃহকর্মী যোগ করা হয়নি</p>
+                    }
+                </div>
+                <a href="@Url.Action("HouseWorkers", "Home")" class="btn btn-primary section-action">
+                    <i class="fas fa-plus"></i>
+                    যোগ করুন
+                </a>
+            </div>
+
+            <!-- Current Landlord -->
+            <div class="section-card">
+                <div class="section-card-header">
+                    <div class="section-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <span class="section-status @(Model.CurrentLandlord != null ? "status-complete" : "status-incomplete")">
+                        @(Model.CurrentLandlord != null ? "সম্পূর্ণ" : "অসম্পূর্ণ")
+                    </span>
+                </div>
+                <h3 class="section-title">বর্তমান বাড়িওয়ালা</h3>
+                <div class="section-content">
+                    @if (Model.CurrentLandlord != null)
+                    {
+                        <ul class="section-list">
+                            <li><span>নাম:</span> <strong>@Model.CurrentLandlord.NameBN</strong></li>
+                            <li><span>মোবাইল:</span> @Model.CurrentLandlord.MobileNumber</li>
+                            <li><span>ঠিকানা:</span> @Model.CurrentLandlord.Address</li>
+                            <li><span>থেকে:</span> @Model.CurrentLandlord.FromDate.ToString("dd-MM-yyyy")</li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <p style="color: var(--text-light);">বর্তমান বাড়িওয়ালার তথ্য যোগ করা হয়নি</p>
+                    }
+                </div>
+                <a href="@Url.Action("CurrentLandlord", "Home")" class="btn btn-primary section-action">
+                    <i class="fas fa-@(Model.CurrentLandlord != null ? "edit" : "plus")"></i>
+                    @(Model.CurrentLandlord != null ? "সম্পাদনা" : "যোগ করুন")
+                </a>
+            </div>
         </div>
-    </main>
-</div>
 
-@section Scripts {
-    <script>
-        // Initialize tooltips
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip();
-        });
-
-        // Mobile sidebar toggle
-        function toggleSidebar() {
-            document.querySelector('.sidebar').classList.toggle('active');
+        <!-- Download Section -->
+        @if (canDownload)
+        {
+            <div class="download-section">
+                <h3 class="download-title">যাচাইকরণ রিপোর্ট প্রস্তুত!</h3>
+                <p class="download-description">
+                    আপনার যাচাইকরণ প্রক্রিয়া @completionPercentage% সম্পূর্ণ হয়েছে। 
+                    এখন আপনি যাচাইকরণ রিপোর্ট ডাউনলোড করতে পারেন।
+                </p>
+                <a href="@Url.Action("DownloadVerification", "Home")" class="btn btn-download">
+                    <i class="fas fa-download"></i>
+                    PDF ডাউনলোড করুন
+                </a>
+            </div>
         }
+        else
+        {
+            <div class="download-section disabled">
+                <h3 class="download-title">যাচাইকরণ রিপোর্ট প্রস্তুত নয়</h3>
+                <p class="download-description">
+                    যাচাইকরণ রিপোর্ট ডাউনলোড করতে কমপক্ষে ৯০% তথ্য সম্পূর্ণ করতে হবে। 
+                    বর্তমানে @completionPercentage% সম্পূর্ণ হয়েছে।
+                </p>
+                <button class="btn btn-download" disabled>
+                    <i class="fas fa-lock"></i>
+                    ডাউনলোড করুন (@(90 - completionPercentage)% বাকি)
+                </button>
+            </div>
+        }
+    </main>
 
-        // Chart animations
+    <script>
+        // Animate progress bar on load
         document.addEventListener('DOMContentLoaded', function() {
-            const progressFill = document.querySelector('.progress-fill');
-            const originalWidth = progressFill.style.width;
-            progressFill.style.width = '0%';
-
+            const progressBar = document.querySelector('.progress-bar-fill');
+            const percentage = @completionPercentage;
+            
+            // Reset width
+            progressBar.style.width = '0%';
+            
+            // Animate to actual percentage
             setTimeout(() => {
-                progressFill.style.width = originalWidth;
+                progressBar.style.width = percentage + '%';
             }, 300);
         });
     </script>
-}
+</body>
+</html>
